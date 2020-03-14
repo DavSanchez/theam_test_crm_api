@@ -22,17 +22,11 @@ func InitDB() {
 	}
 	defer db.Close()
 
-	res, err := db.Query("SELECT version()")
+	err = db.Ping()
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var result string
-	res.Next()
-	err = res.Scan(&result)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Connected to database: %q", result)
-	res.Close()
+	log.Print("Connected to database")
 }
