@@ -1,14 +1,21 @@
-package main
+package db
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	_ "github.com/lib/pq"
 )
 
-func initDB() {
-	db, err := sql.Open("postgres","") // TODO
+const (
+	db_name = "api"
+	db_user = "docker"
+	db_pass = "docker"
+)
+
+func InitDB() {
+	db, err := sql.Open("postgres",fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", db_user, db_pass, db_name))
 
 	if err != nil {
 		log.Fatal(err)
@@ -21,6 +28,7 @@ func initDB() {
 	}
 
 	var result string
+	res.Next()
 	err = res.Scan(&result)
 	if err != nil {
 		log.Fatal(err)
