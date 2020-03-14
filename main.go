@@ -1,11 +1,20 @@
 package main
 
-import "fmt"
+import (
+	"log"
+	"net/http"
+)
 
-func Hello() string {
-	return "Hello, world!"
+func home(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello world!"))
 }
 
 func main() {
-	fmt.Println(Hello())
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", home)
+
+	log.Println("Starting server on :4000")
+
+	err := http.ListenAndServe(":4000", mux)
+	log.Fatal(err)
 }
