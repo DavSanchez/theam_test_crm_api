@@ -1,0 +1,1 @@
+web: bin/test_crm_api
