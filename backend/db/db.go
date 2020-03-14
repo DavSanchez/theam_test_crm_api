@@ -17,6 +17,8 @@ var ( /* constants */
 	db_host = os.Getenv("DB_HOST")
 )
 
+// TODO: Need a Database object for the routes to access it!!
+
 func InitDB() {
 	time.Sleep(5 * time.Second) // Wait for database to set up (Docker, just in case!)
 	db_params_str := fmt.Sprintf("dbname=%s user=%s password=%s host=%s sslmode=disable", db_name, db_user, db_pass, db_host)
