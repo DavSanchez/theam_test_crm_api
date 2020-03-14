@@ -15,7 +15,8 @@ const (
 )
 
 func InitDB() {
-	db, err := sql.Open("postgres",fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", db_user, db_pass, db_name))
+	db_params_str := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", db_user, db_pass, db_name)
+	db, err := sql.Open("postgres", db_params_str)
 
 	if err != nil {
 		log.Fatal(err)
@@ -29,3 +30,5 @@ func InitDB() {
 	}
 	log.Print("Connected to database")
 }
+
+func 

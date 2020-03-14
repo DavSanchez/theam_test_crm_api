@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 )
 
 // Customer
@@ -33,4 +34,29 @@ func (ns *NullString) MarshalJSON() ([]byte, error) {
 		return []byte("null"), nil
 	}
 	return json.Marshal(ns.String)
+}
+
+// Functions for interacting with DB
+func InsertUser(db *sql.DB, username, password string) error {
+	return errors.New("Error")
+}
+
+func ListAllCustomers(db *sql.DB) error {
+	return errors.New("Error")
+}
+
+func GetCustomer(db *sql.DB) error {
+	return errors.New("Error")
+}
+
+func CreateCustomer(db *sql.DB) error {
+	return errors.New("Error")
+}
+
+func UpdateCustomer(db *sql.DB) error {
+	return errors.New("Error")
+}
+
+func DeleteCustomer(db *sql.DB) error {
+	return errors.New("Error")
 }
