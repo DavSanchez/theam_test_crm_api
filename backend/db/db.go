@@ -27,6 +27,5 @@ func InitDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	log.Print("Connected to database")
 }
