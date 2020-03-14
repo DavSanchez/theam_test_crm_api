@@ -3,18 +3,14 @@ package main
 import (
 	"log"
 	"net/http"
+	"theam.io/jdavidsanchez/test_crm_api/api"
 )
 
-func home(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello world!"))
-}
-
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
+	api.InitRouter()
 
 	log.Println("Starting server on :4000")
 
-	err := http.ListenAndServe(":4000", mux)
+	err := http.ListenAndServe(":4000", api.Router)
 	log.Fatal(err)
 }
