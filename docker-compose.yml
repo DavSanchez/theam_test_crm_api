@@ -27,4 +27,4 @@ go_backend:
     restart: on-failure
     depends_on:
       - postgres_db
-    # command:
+    command: "go run main.go"
