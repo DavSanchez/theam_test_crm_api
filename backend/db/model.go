@@ -41,23 +41,23 @@ func (ns *NullString) MarshalJSON() ([]byte, error) {
 
 // Functions for interacting with DB
 
-func ListAllCustomers(db *sql.DB) error {
+func (c *Customer) ListAllCustomers(db *sql.DB) error {
 	return errors.New("Error")
 }
 
-func GetCustomer(db *sql.DB) error {
+func (c *Customer) GetCustomer(db *sql.DB) error {
 	return errors.New("Error")
 }
 
-func CreateCustomer(db *sql.DB) error {
+func (c *Customer) CreateCustomer(db *sql.DB) error {
 	return errors.New("Error")
 }
 
-func UpdateCustomer(db *sql.DB) error {
+func (c *Customer) UpdateCustomer(db *sql.DB) error {
 	return errors.New("Error")
 }
 
-func DeleteCustomer(db *sql.DB) error {
+func (c *Customer) DeleteCustomer(db *sql.DB) error {
 	return errors.New("Error")
 }
 
