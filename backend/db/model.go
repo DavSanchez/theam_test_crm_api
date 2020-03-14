@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Customer
@@ -37,9 +40,6 @@ func (ns *NullString) MarshalJSON() ([]byte, error) {
 }
 
 // Functions for interacting with DB
-func InsertUser(db *sql.DB, username, password string) error {
-	return errors.New("Error")
-}
 
 func ListAllCustomers(db *sql.DB) error {
 	return errors.New("Error")
@@ -59,4 +59,18 @@ func UpdateCustomer(db *sql.DB) error {
 
 func DeleteCustomer(db *sql.DB) error {
 	return errors.New("Error")
+}
+
+func InsertUserIfNotExists(db *sql.DB, username, password string) error {
+	passwdHash, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	CheckErr(err)
+
+	_, err = db.Exec(`
+		INSERT INTO users(username, password)
+		VALUES ($1, $2) ON CONFLICT DO NOTHING`, username, string(passwdHash))
+	CheckErr(err)
+
+	fmt.Println("Inserted a new user")
+
+	return err
 }
