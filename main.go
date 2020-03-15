@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"theam.io/jdavidsanchez/test_crm_api/api"
 	"theam.io/jdavidsanchez/test_crm_api/db"
@@ -14,9 +15,10 @@ func init() {
 }
 
 func main() {
-	log.Println("Starting server on :4000")
+	port := os.Getenv("PORT")
+	log.Printf("Starting server on :%s", port)
 
-	err := http.ListenAndServe(":4000", api.Router)
+	err := http.ListenAndServe(":" + port, api.Router)
 	db.DB.Close()
 	log.Fatal(err)
 }
