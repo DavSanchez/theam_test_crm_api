@@ -3,11 +3,13 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
+	"flag"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
 	"theam.io/jdavidsanchez/test_crm_api/db"
+	"theam.io/jdavidsanchez/test_crm_api/utils"
 )
 
 var Router = mux.NewRouter()
@@ -15,10 +17,10 @@ var Router = mux.NewRouter()
 func listAllCustomers(w http.ResponseWriter, r *http.Request) {
 	customers, err := db.ListAllCustomers(db.DB)
 	if err != nil {
-		responseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
-	responseJSON(w, http.StatusOK, customers)
+	utils.ResponseJSON(w, http.StatusOK, customers)
 }
 
 func getCustomer(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +28,7 @@ func getCustomer(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(params["customerId"])
 
 	if err != nil {
-		responseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid customer ID"})
+		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid customer ID"})
 		return
 	}
 
@@ -38,59 +40,59 @@ func getCustomer(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
-			responseJSON(w, http.StatusNotFound, map[string]string{"error": "Customer not found"})
+			utils.ResponseJSON(w, http.StatusNotFound, map[string]string{"error": "Customer not found"})
 		default:
-			responseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		}
 		return
 	}
 
-	responseJSON(w, http.StatusOK, c)
+	utils.ResponseJSON(w, http.StatusOK, c)
 }
 
 func createCustomer(w http.ResponseWriter, r *http.Request) {
-	// TODO: Handle image upload
 	var c db.Customer
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&c); err != nil {
-		responseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
+	err := decoder.Decode(&c)
+	if err != nil {
+		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request payload: " + err.Error()})
 	}
 	defer r.Body.Close()
 
-	err := c.CreateCustomer(db.DB)
+	err = c.CreateCustomer(db.DB)
 	if err != nil {
-		responseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
 
-	responseJSON(w, http.StatusCreated, c)
+	utils.ResponseJSON(w, http.StatusCreated, c)
 }
 
 func updateCustomer(w http.ResponseWriter, r *http.Request) {
-	// TODO: Handle image upload
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["customerId"])
 
 	if err != nil {
-		responseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid customer ID"})
+		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid customer ID"})
 		return
 	}
 
 	var c db.Customer
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&c); err != nil {
-		responseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
+	err = decoder.Decode(&c)
+	if err != nil {
+		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
 	}
 	defer r.Body.Close()
 
 	c.Id = id
 	err = c.UpdateCustomer(db.DB)
 	if err != nil {
-		responseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
 
-	responseJSON(w, http.StatusOK, c)
+	utils.ResponseJSON(w, http.StatusOK, c)
 }
 
 func deleteCustomer(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +100,7 @@ func deleteCustomer(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(params["customerId"])
 
 	if err != nil {
-		responseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid customer ID"})
+		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid customer ID"})
 		return
 	}
 
@@ -108,11 +110,30 @@ func deleteCustomer(w http.ResponseWriter, r *http.Request) {
 	err = c.DeleteCustomer(db.DB)
 
 	if err != nil {
-		responseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
 
-	responseJSON(w, http.StatusOK, map[string]string{"result": "success"})
+	utils.ResponseJSON(w, http.StatusOK, map[string]string{"result": "success"})
+}
+
+func addPicture(w http.ResponseWriter, r *http.Request) {
+
+	var p db.PicturePath
+	imageName, err := utils.FileUpload(r)
+	if err != nil {
+		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid data"})
+		return
+	}
+
+	p.Path = imageName
+	err = p.AddImage(db.DB)
+	if err != nil {
+		utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+
+	utils.ResponseJSON(w, http.StatusOK, p)
 }
 
 func InitRouter() {
@@ -123,12 +144,9 @@ func InitRouter() {
 	customers.HandleFunc("/create", createCustomer).Methods("POST")
 	customers.HandleFunc("/{customerId:[0-9]+}", updateCustomer).Methods("PUT")
 	customers.HandleFunc("/{customerId:[0-9]+}", deleteCustomer).Methods("DELETE")
-}
+	customers.HandleFunc("/picture", addPicture).Methods("POST")
 
-func responseJSON(w http.ResponseWriter, code int, payload interface{}) {
-	res, _ := json.Marshal(payload)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	w.Write(res)
+	var dir string
+	flag.StringVar(&dir, "dir", "./img/", "Directory to serve the images")
+	Router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 }

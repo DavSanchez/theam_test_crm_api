@@ -6,6 +6,7 @@ import (
 	"os"
 
 	_ "github.com/lib/pq"
+	"theam.io/jdavidsanchez/test_crm_api/utils"
 )
 
 var DB *sql.DB
@@ -15,11 +16,11 @@ func InitDB() {
 
 	DB, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
 
-	CheckErr(err)
+	utils.CheckErr(err)
 
 	err = DB.Ping()
 
-	CheckErr(err)
+	utils.CheckErr(err)
 	log.Print("Connected to database")
 
 	_, err = DB.Exec(`
@@ -28,17 +29,24 @@ func InitDB() {
 			username VARCHAR(32) UNIQUE NOT NULL,
 			password VARCHAR(64) NOT NULL
 		)`)
-	CheckErr(err)
+	utils.CheckErr(err)
+
+	_, err = DB.Exec(`
+		CREATE TABLE IF NOT EXISTS pictures (
+			id SERIAL PRIMARY KEY,
+			path TEXT
+		)`)
+	utils.CheckErr(err)
 
 	_, err = DB.Exec(`
 		CREATE TABLE IF NOT EXISTS customers (
 			id SERIAL PRIMARY KEY,
 			name VARCHAR(32) NOT NULL,
 			surname VARCHAR(32) NOT NULL,
-			photoUrl TEXT,
-			lastModifiedByUserId INT REFERENCES users(id)
+			pictureId INT,
+			lastModifiedByUserId INT REFERENCES users(id) NOT NULL
 		)`)
-	CheckErr(err)
+	utils.CheckErr(err)
 
 	initialUser := User{
 		Username: "Admin",
@@ -46,12 +54,6 @@ func InitDB() {
 	}
 
 	err = initialUser.InsertUserIfNotExists(DB)
-	CheckErr(err)
+	utils.CheckErr(err)
 
-}
-
-func CheckErr(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
 }
