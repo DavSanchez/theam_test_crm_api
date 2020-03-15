@@ -25,6 +25,7 @@ services:
             - DB_USER=docker
             - DB_PASS=docker
             - DB_HOST=postgres_db
+            - PORT=4000
         ports:
             - 4000:4000
         restart: on-failure
