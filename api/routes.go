@@ -49,6 +49,7 @@ func getCustomer(w http.ResponseWriter, r *http.Request) {
 }
 
 func createCustomer(w http.ResponseWriter, r *http.Request) {
+	// TODO: Handle image upload
 	var c db.Customer
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&c); err != nil {
@@ -66,6 +67,7 @@ func createCustomer(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateCustomer(w http.ResponseWriter, r *http.Request) {
+	// TODO: Handle image upload
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["customerId"])
 
