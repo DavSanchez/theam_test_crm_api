@@ -17,7 +17,6 @@ func TestMain(m *testing.M) {
 
 	clearCustomersTable()
 
-	db.DB.Close()
 	os.Exit(code)
 }
 
@@ -25,7 +24,7 @@ func TestAPI_listAllCustomers(t *testing.T) {
 
 	t.Run("Testing getting an empty customer list", func(t *testing.T) {
 		clearCustomersTable()
-		req, _ := http.NewRequest("GET", "/customers/list", nil)
+		req, _ := http.NewRequest("GET", "/customers/all", nil)
 		response := executeRequest(t, req)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
@@ -47,25 +46,21 @@ func TestAPI_getCustomer(t *testing.T) {
 
 		var m map[string]string
 		json.Unmarshal(response.Body.Bytes(), &m)
-		if m["error"] != "Product not found" {
+		if m["error"] != "Customer not found" {
 			t.Errorf("Expected the 'error' key of the response to be set to 'Customer not found'. Got '%s'", m["error"])
 		}
 	})
 }
 
-func Test_getCustomer(t *testing.T) {
+func TestAPI_createCustomer(t *testing.T) {
 	// TODO: not implemented
 }
 
-func Test_createCustomer(t *testing.T) {
+func TestAPI_updateCustomer(t *testing.T) {
 	// TODO: not implemented
 }
 
-func Test_updateCustomer(t *testing.T) {
-	// TODO: not implemented
-}
-
-func Test_deleteCustomer(t *testing.T) {
+func TestAPI_deleteCustomer(t *testing.T) {
 	// TODO: not implemented
 }
 
