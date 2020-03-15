@@ -21,10 +21,7 @@ services:
     go_backend:
         build: ./
         environment:
-            - DB_NAME=api
-            - DB_USER=docker
-            - DB_PASS=docker
-            - DB_HOST=postgres_db
+            - DATABASE_URL=dbname=api user=docker password=docker host=postgres_db sslmode=disable
             - PORT=4000
         ports:
             - 4000:4000

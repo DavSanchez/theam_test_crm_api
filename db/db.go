@@ -2,32 +2,18 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 
 	_ "github.com/lib/pq"
 )
 
-var ( /* constants and database global object */
-	db_name = os.Getenv("DB_NAME")
-	db_user = os.Getenv("DB_USER")
-	db_pass = os.Getenv("DB_PASS")
-	db_host = os.Getenv("DB_HOST")
-
-	DB *sql.DB
-)
+var DB *sql.DB
 
 func InitDB() {
 	var err error
 
-	db_params_str := fmt.Sprintf("dbname=%s user=%s password=%s host=%s sslmode=disable",
-		db_name,
-		db_user,
-		db_pass,
-		db_host)
-
-	DB, err = sql.Open("postgres", db_params_str)
+	DB, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
 
 	CheckErr(err)
 
