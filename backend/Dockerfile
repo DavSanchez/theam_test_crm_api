@@ -4,6 +4,7 @@ WORKDIR /go/src/
 COPY . .
 
 RUN go get -d -v ./...
+RUN go test -v
 
 EXPOSE 4000
 
