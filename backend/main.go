@@ -17,5 +17,6 @@ func main() {
 	log.Println("Starting server on :4000")
 
 	err := http.ListenAndServe(":4000", api.Router)
+	db.DB.Close()
 	log.Fatal(err)
 }
