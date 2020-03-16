@@ -127,9 +127,36 @@ func addPicture(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.Path = imageName
-	err = p.AddImage(db.DB)
+	err = p.AddPicture(db.DB)
 	if err != nil {
 		utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+
+	utils.ResponseJSON(w, http.StatusOK, p)
+}
+
+func getPicturePath(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["pictureId"])
+
+	if err != nil {
+		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid picture ID"})
+		return
+	}
+
+	p := db.PicturePath{
+		Id: id,
+	}
+	err = p.GetPicturePath(db.DB)
+
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			utils.ResponseJSON(w, http.StatusNotFound, map[string]string{"error": "Picture not found"})
+		default:
+			utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		}
 		return
 	}
 
@@ -144,6 +171,7 @@ func InitRouter() {
 	customers.HandleFunc("/create", createCustomer).Methods("POST")
 	customers.HandleFunc("/{customerId:[0-9]+}", updateCustomer).Methods("PUT")
 	customers.HandleFunc("/{customerId:[0-9]+}", deleteCustomer).Methods("DELETE")
+	customers.HandleFunc("/picture/{pictureId}", getPicturePath).Methods("GET")
 	customers.HandleFunc("/picture", addPicture).Methods("POST")
 
 	var dir string
