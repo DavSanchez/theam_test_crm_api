@@ -133,9 +133,9 @@ func (u *User) InsertUserIfNotExists(db *sql.DB) error {
 	return nil
 }
 
-func (p *PicturePath) AddPictureIfNotExists(db *sql.DB) error {
+func (p *PicturePath) AddPlaceholderPicture(db *sql.DB) error {
 	_, err := db.Exec(`
-		INSERT INTO pictures (path)
+		INSERT INTO pictures (id, path)
 		VALUES (1, $1) ON CONFLICT DO NOTHING
 		`, p.Path)
 
