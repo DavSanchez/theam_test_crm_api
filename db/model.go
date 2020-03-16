@@ -2,7 +2,8 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
+	"log"
 
 	"golang.org/x/crypto/bcrypt"
 	"theam.io/jdavidsanchez/test_crm_api/utils"
@@ -73,7 +74,7 @@ func (c *Customer) CreateCustomer(db *sql.DB) error {
 }
 
 func (c *Customer) UpdateCustomer(db *sql.DB) error {
-	_, err := db.Exec(`
+	res, err := db.Exec(`
 		UPDATE customers SET
 		name = $1,
 		surname = $2,
@@ -82,6 +83,9 @@ func (c *Customer) UpdateCustomer(db *sql.DB) error {
 		WHERE id = $5
 		`, c.Name, c.Surname, c.PictureId, c.LastModifiedByUserId, c.Id)
 
+	if numRows, _ := res.RowsAffected(); numRows == 0 {
+		err = errors.New("No customer was updated")
+	}
 	return err
 }
 
@@ -129,7 +133,7 @@ func (u *User) InsertUserIfNotExists(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Inserted initial user if it didn't exist ")
+	log.Println("Inserted initial user if it didn't exist ")
 	return nil
 }
 
@@ -142,7 +146,7 @@ func (p *PicturePath) AddPlaceholderPicture(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Inserted placeholder picture if it didn't exist ")
+	log.Println("Inserted placeholder picture if it didn't exist ")
 	return nil
 }
 
