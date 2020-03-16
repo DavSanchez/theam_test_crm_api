@@ -13,7 +13,7 @@ type Customer struct {
 	Id                   int    `json:"id"`
 	Name                 string `json:"name"`
 	Surname              string `json:"surname"`
-	PictureId            *int   `json:"pictureId"`
+	PictureId            int    `json:"pictureId"`
 	LastModifiedByUserId int    `json:"lastModifiedByUserId"`
 	// TODO: What about CreatedByUserId? Should we include time of creation/modification?
 	// pq.NullTime type
@@ -79,7 +79,7 @@ func (c *Customer) UpdateCustomer(db *sql.DB) error {
 		surname = $2,
 		pictureId = $3,
 		lastModifiedByUserId = $4
-		WHERE id = $4
+		WHERE id = $5
 		`, c.Name, c.Surname, c.PictureId, c.LastModifiedByUserId, c.Id)
 
 	return err
@@ -124,15 +124,29 @@ func (u *User) InsertUserIfNotExists(db *sql.DB) error {
 
 	_, err = db.Exec(`
 		INSERT INTO users (username, password)
-		VALUES ($1, $2) ON CONFLICT DO NOTHING`, u.Username, string(passwdHash))
+		VALUES ($1, $2) ON CONFLICT DO NOTHING`, u.Username, passwdHash)
 
-	utils.CheckErr(err)
-
+	if err != nil {
+		return err
+	}
 	fmt.Println("Inserted initial user if it didn't exist ")
-	return err
+	return nil
 }
 
-func (p *PicturePath) AddImage(db *sql.DB) error {
+func (p *PicturePath) AddPictureIfNotExists(db *sql.DB) error {
+	_, err := db.Exec(`
+		INSERT INTO pictures (path)
+		VALUES (1, $1) ON CONFLICT DO NOTHING
+		`, p.Path)
+
+	if err != nil {
+		return err
+	}
+	fmt.Println("Inserted placeholder picture if it didn't exist ")
+	return nil
+}
+
+func (p *PicturePath) AddPicture(db *sql.DB) error {
 	err := db.QueryRow(`
 		INSERT INTO pictures (path)
 		VALUES ($1)
@@ -143,4 +157,11 @@ func (p *PicturePath) AddImage(db *sql.DB) error {
 		return err
 	}
 	return nil
+}
+
+func (p *PicturePath) GetPicturePath(db *sql.DB) error {
+	return db.QueryRow(`
+		SELECT path FROM pictures
+		WHERE id = $1
+		`, p.Id).Scan(&p.Path)
 }
