@@ -82,6 +82,7 @@ func updateCustomer(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&c)
 	if err != nil {
 		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
+		return
 	}
 	defer r.Body.Close()
 
