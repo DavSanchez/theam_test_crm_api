@@ -96,7 +96,7 @@ func (c *Customer) DeleteCustomer(db *sql.DB) error {
 
 func ListAllCustomers(db *sql.DB) ([]Customer, error) {
 	rows, err := db.Query(`
-		SELECT (id, name, surname, pictureId, lastModifiedByUserId)
+		SELECT id, name, surname, pictureId, lastModifiedByUserId
 		FROM customers`)
 
 	if err != nil {
