@@ -60,6 +60,6 @@ func InitDB() {
 
 	err = initialUser.InsertUserIfNotExists(DB)
 	utils.CheckErr(err)
-	err = noPicturePlaceholder.AddPictureIfNotExists(DB)
+	err = noPicturePlaceholder.AddPlaceholderPicture(DB)
 	utils.CheckErr(err)
 }
