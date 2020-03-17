@@ -29,21 +29,21 @@ func InitDB() {
 		CREATE TABLE IF NOT EXISTS users (
 			id SERIAL PRIMARY KEY,
 			username VARCHAR(32) UNIQUE NOT NULL,
-			password BYTEA NOT NULL
+			passwd BYTEA NOT NULL
 		)`)
 	utils.CheckErr(err)
 
 	_, err = DB.Exec(`
 		CREATE TABLE IF NOT EXISTS pictures (
 			id SERIAL PRIMARY KEY,
-			path TEXT UNIQUE NOT NULL
+			picturepath TEXT UNIQUE NOT NULL
 		)`)
 	utils.CheckErr(err)
 
 	_, err = DB.Exec(`
 		CREATE TABLE IF NOT EXISTS customers (
 			id SERIAL PRIMARY KEY,
-			name VARCHAR(32) NOT NULL,
+			customername VARCHAR(32) NOT NULL,
 			surname VARCHAR(32) NOT NULL,
 			pictureId INT REFERENCES pictures(id),
 			lastModifiedByUserId INT REFERENCES users(id)

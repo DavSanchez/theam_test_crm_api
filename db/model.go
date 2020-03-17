@@ -143,7 +143,7 @@ func (u *User) CreateUser(db *sql.DB) error {
 
 func (p *PicturePath) AddPicture(db *sql.DB) error {
 	err := db.QueryRow(`
-		INSERT INTO pictures (path)
+		INSERT INTO pictures (picturepath)
 		VALUES ($1)
 		RETURNING id
 		`, p.Path).Scan(&p.Id)
@@ -156,7 +156,7 @@ func (p *PicturePath) AddPicture(db *sql.DB) error {
 
 func (p *PicturePath) GetPicturePath(db *sql.DB) error {
 	return db.QueryRow(`
-		SELECT path FROM pictures
+		SELECT picturepath FROM pictures
 		WHERE id = $1
 		`, p.Id).Scan(&p.Path)
 }
