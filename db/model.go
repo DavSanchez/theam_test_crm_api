@@ -54,7 +54,7 @@ type PicturePath struct {
 
 func (c *Customer) GetCustomer(db *sql.DB) error {
 	return db.QueryRow(`
-		SELECT name, surname, pictureId, lastModifiedByUserId
+		SELECT customername, surname, pictureId, lastModifiedByUserId
 		FROM customers
 		WHERE id = $1
 		`, c.Id).Scan(&c.Name, &c.Surname, &c.PictureId, &c.LastModifiedByUserId)
@@ -62,7 +62,7 @@ func (c *Customer) GetCustomer(db *sql.DB) error {
 
 func (c *Customer) CreateCustomer(db *sql.DB) error {
 	err := db.QueryRow(`
-		INSERT INTO customers (name, surname, pictureId, lastModifiedByUserId)
+		INSERT INTO customers (customername, surname, pictureId, lastModifiedByUserId)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id
 		`, c.Name, c.Surname, c.PictureId, c.LastModifiedByUserId).Scan(&c.Id)
@@ -76,7 +76,7 @@ func (c *Customer) CreateCustomer(db *sql.DB) error {
 func (c *Customer) UpdateCustomer(db *sql.DB) error {
 	res, err := db.Exec(`
 		UPDATE customers SET
-		name = $1,
+		customername = $1,
 		surname = $2,
 		pictureId = $3,
 		lastModifiedByUserId = $4
@@ -90,17 +90,21 @@ func (c *Customer) UpdateCustomer(db *sql.DB) error {
 }
 
 func (c *Customer) DeleteCustomer(db *sql.DB) error {
-	_, err := db.Exec(`
+	res, err := db.Exec(`
 		DELETE FROM customers
 		WHERE id = $1
 		`, c.Id)
+
+	if numRows, _ := res.RowsAffected(); numRows == 0 {
+		err = errors.New("No customer was deleted")
+	}
 
 	return err
 }
 
 func ListAllCustomers(db *sql.DB) ([]Customer, error) {
 	rows, err := db.Query(`
-		SELECT id, name, surname, pictureId, lastModifiedByUserId
+		SELECT id, customername, surname, pictureId, lastModifiedByUserId
 		FROM customers`)
 
 	if err != nil {
@@ -122,31 +126,19 @@ func ListAllCustomers(db *sql.DB) ([]Customer, error) {
 	return customers, nil
 }
 
-func (u *User) InsertUserIfNotExists(db *sql.DB) error {
+func (u *User) CreateUser(db *sql.DB) error {
 	passwdHash, err := bcrypt.GenerateFromPassword([]byte(u.Password), 14)
 	utils.CheckErr(err)
 
-	_, err = db.Exec(`
-		INSERT INTO users (username, password)
-		VALUES ($1, $2) ON CONFLICT DO NOTHING`, u.Username, passwdHash)
+	err = db.QueryRow(`
+		INSERT INTO users (username, passwd)
+		VALUES ($1, $2)
+		RETURNING id
+		`, u.Username, passwdHash).Scan(&u.Id)
 
 	if err != nil {
 		return err
 	}
-	log.Println("Inserted initial user if it didn't exist ")
-	return nil
-}
-
-func (p *PicturePath) AddPlaceholderPicture(db *sql.DB) error {
-	_, err := db.Exec(`
-		INSERT INTO pictures (id, path)
-		VALUES (1, $1) ON CONFLICT DO NOTHING
-		`, p.Path)
-
-	if err != nil {
-		return err
-	}
-	log.Println("Inserted placeholder picture if it didn't exist ")
 	return nil
 }
 
