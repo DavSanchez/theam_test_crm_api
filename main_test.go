@@ -1,16 +1,20 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"testing"
 
 	"theam.io/jdavidsanchez/test_crm_api/api"
 	"theam.io/jdavidsanchez/test_crm_api/db"
 )
+
+// Integration test (test the API and its connection with the database)
 
 func TestMain(m *testing.M) {
 	code := m.Run()
@@ -20,9 +24,8 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestAPI_listAllCustomers(t *testing.T) {
-
-	t.Run("Testing getting an empty customer list", func(t *testing.T) {
+func Test_API_listAllCustomers(t *testing.T) {
+	t.Run("Get an empty customer list", func(t *testing.T) {
 		clearCustomersTable()
 		req, _ := http.NewRequest("GET", "/customers/all", nil)
 		response := executeRequest(t, req)
@@ -33,13 +36,70 @@ func TestAPI_listAllCustomers(t *testing.T) {
 			t.Errorf("Expected an empty array. Got %s", body)
 		}
 	})
+	t.Run("Get one customer", func(t *testing.T) {
+		clearCustomersTable()
+		// Add one customer
+		newCustomer := db.Customer{
+			Name:                 "Test_Name",
+			Surname:              "Test_Surname",
+			PictureId:            1,
+			LastModifiedByUserId: 1,
+		}
+		data, _ := json.Marshal(newCustomer)
+		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
+		executeRequest(t, req)
+
+		req, _ = http.NewRequest("GET", "/customers/all", nil)
+		response := executeRequest(t, req)
+
+		want := "[{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"lastModifiedByUserId\":1}]"
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		if body := response.Body.String(); body != want {
+			t.Errorf("Expected %s. Got %s", want, body)
+		}
+	})
+	t.Run("Get two customers", func(t *testing.T) {
+		clearCustomersTable()
+		// Add two customers
+		newCustomer := db.Customer{
+			Name:                 "Test_Name",
+			Surname:              "Test_Surname",
+			PictureId:            1,
+			LastModifiedByUserId: 1,
+		}
+		anotherCustomer := db.Customer{
+			Name:                 "Test_Name_2",
+			Surname:              "Test_Surname_2",
+			PictureId:            1,
+			LastModifiedByUserId: 1,
+		}
+
+		data, _ := json.Marshal(newCustomer)
+		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
+		executeRequest(t, req)
+		data, _ = json.Marshal(anotherCustomer)
+		req, _ = http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
+		executeRequest(t, req)
+
+		req, _ = http.NewRequest("GET", "/customers/all", nil)
+		response := executeRequest(t, req)
+
+		want := "[{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"lastModifiedByUserId\":1},{\"id\":2,\"name\":\"Test_Name_2\",\"surname\":\"Test_Surname_2\",\"pictureId\":1,\"lastModifiedByUserId\":1}]"
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		if body := response.Body.String(); body != want {
+			t.Errorf("Expected %s. Got %s", want, body)
+		}
+	})
 }
 
-func TestAPI_getCustomer(t *testing.T) {
-
-	t.Run("Testing getting a non existing customer", func(t *testing.T) {
+func Test_API_getCustomer(t *testing.T) {
+	t.Run("Get a non existing customer", func(t *testing.T) {
 		clearCustomersTable()
-		req, _ := http.NewRequest("GET", "/customers/11", nil)
+		req, _ := http.NewRequest("GET", "/customers/22", nil)
 		response := executeRequest(t, req)
 
 		checkResponseCode(t, http.StatusNotFound, response.Code)
@@ -50,17 +110,54 @@ func TestAPI_getCustomer(t *testing.T) {
 			t.Errorf("Expected the 'error' key of the response to be set to 'Customer not found'. Got '%s'", m["error"])
 		}
 	})
+	t.Run("Get one customer", func(t *testing.T) {
+		clearCustomersTable()
+		// Add one customer
+		newCustomer := db.Customer{
+			Name:                 "Test_Name",
+			Surname:              "Test_Surname",
+			PictureId:            1,
+			LastModifiedByUserId: 1,
+		}
+		data, _ := json.Marshal(newCustomer)
+		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
+		executeRequest(t, req)
+
+		req, _ = http.NewRequest("GET", "/customers/1", nil)
+		response := executeRequest(t, req)
+
+		want := "{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"lastModifiedByUserId\":1}"
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		if body := response.Body.String(); body != want {
+			t.Errorf("Expected %s. Got %s", want, body)
+		}
+	})
+	t.Run("Non valid ID parameter", func(t *testing.T) {
+		clearCustomersTable()
+		req, _ := http.NewRequest("GET", "/customers/hola", nil)
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusNotFound, response.Code)
+
+		got := response.Body.Bytes()
+		want := []byte("404 page not found")
+		if reflect.DeepEqual(got, want) {
+			t.Errorf("Expected %s. Got '%s'", want, got)
+		}
+	})
 }
 
-func TestAPI_createCustomer(t *testing.T) {
+func Test_API_createCustomer(t *testing.T) {
 	// TODO: not implemented
 }
 
-func TestAPI_updateCustomer(t *testing.T) {
+func Test_API_updateCustomer(t *testing.T) {
 	// TODO: not implemented
 }
 
-func TestAPI_deleteCustomer(t *testing.T) {
+func Test_API_deleteCustomer(t *testing.T) {
 	// TODO: not implemented
 }
 
