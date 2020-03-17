@@ -55,7 +55,8 @@ func createCustomer(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&c)
 	if err != nil {
-		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request payload: " + err.Error()})
+		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
+		return
 	}
 	defer r.Body.Close()
 
