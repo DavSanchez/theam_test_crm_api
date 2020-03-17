@@ -145,7 +145,7 @@ Endpoint for getting the picture path of a specific `pictureId`.
 
 
 #### `POST /customers/picture/create`
-Endpoint for creating a specific picture in the system.
+Endpoint for uploading picture to the system.
 ```js
 (Uploaded and stored successfully) [multipart_form] -> {
         "id":1,
