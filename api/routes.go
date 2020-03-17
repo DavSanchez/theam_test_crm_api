@@ -25,7 +25,7 @@ func listAllCustomers(w http.ResponseWriter, r *http.Request) {
 
 func getCustomer(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["customerId"])
+	id, err := strconv.Atoi(params["customerId"]) // This parameter is always an int (Regex in mux route)
 
 	if err != nil {
 		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid customer ID"})
