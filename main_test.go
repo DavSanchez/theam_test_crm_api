@@ -10,8 +10,9 @@ import (
 	"reflect"
 	"testing"
 
-	"theam.io/jdavidsanchez/test_crm_api/api"
 	"theam.io/jdavidsanchez/test_crm_api/db"
+	"theam.io/jdavidsanchez/test_crm_api/models"
+	"theam.io/jdavidsanchez/test_crm_api/routes"
 )
 
 // Integration test (test the API and its connection with the database)
@@ -24,7 +25,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func Test_API_listAllCustomers(t *testing.T) {
+func Test_Route_Customer_listAllCustomers(t *testing.T) {
 	t.Run("Get an empty customer list", func(t *testing.T) {
 		clearCustomersTable()
 		req, _ := http.NewRequest("GET", "/customers/all", nil)
@@ -39,7 +40,7 @@ func Test_API_listAllCustomers(t *testing.T) {
 	t.Run("Get one customer", func(t *testing.T) {
 		clearCustomersTable()
 		// Add one customer
-		newCustomer := db.Customer{
+		newCustomer := models.Customer{
 			Name:                 "Test_Name",
 			Surname:              "Test_Surname",
 			PictureId:            1,
@@ -63,13 +64,13 @@ func Test_API_listAllCustomers(t *testing.T) {
 	t.Run("Get two customers", func(t *testing.T) {
 		clearCustomersTable()
 		// Add two customers
-		newCustomer := db.Customer{
+		newCustomer := models.Customer{
 			Name:                 "Test_Name",
 			Surname:              "Test_Surname",
 			PictureId:            1,
 			LastModifiedByUserId: 1,
 		}
-		anotherCustomer := db.Customer{
+		anotherCustomer := models.Customer{
 			Name:                 "Test_Name_2",
 			Surname:              "Test_Surname_2",
 			PictureId:            1,
@@ -96,7 +97,7 @@ func Test_API_listAllCustomers(t *testing.T) {
 	})
 }
 
-func Test_API_getCustomer(t *testing.T) {
+func Test_Route_Customer_getCustomer(t *testing.T) {
 	t.Run("Get a non existing customer", func(t *testing.T) {
 		clearCustomersTable()
 		req, _ := http.NewRequest("GET", "/customers/22", nil)
@@ -113,7 +114,7 @@ func Test_API_getCustomer(t *testing.T) {
 	t.Run("Get one customer", func(t *testing.T) {
 		clearCustomersTable()
 		// Add one customer
-		newCustomer := db.Customer{
+		newCustomer := models.Customer{
 			Name:                 "Test_Name",
 			Surname:              "Test_Surname",
 			PictureId:            1,
@@ -149,15 +150,15 @@ func Test_API_getCustomer(t *testing.T) {
 	})
 }
 
-func Test_API_createCustomer(t *testing.T) {
+func Test_Route_Customer_createCustomer(t *testing.T) {
 	// TODO: not implemented
 }
 
-func Test_API_updateCustomer(t *testing.T) {
+func Test_Route_Customer_updateCustomer(t *testing.T) {
 	// TODO: not implemented
 }
 
-func Test_API_deleteCustomer(t *testing.T) {
+func Test_Route_Customer_deleteCustomer(t *testing.T) {
 	// TODO: not implemented
 }
 
@@ -175,7 +176,7 @@ func clearCustomersTable() {
 func executeRequest(t *testing.T, req *http.Request) *httptest.ResponseRecorder {
 	t.Helper()
 	rr := httptest.NewRecorder()
-	api.Router.ServeHTTP(rr, req)
+	routes.Router.ServeHTTP(rr, req)
 
 	return rr
 }

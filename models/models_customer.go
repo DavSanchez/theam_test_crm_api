@@ -1,11 +1,8 @@
-package db
+package models
 
 import (
 	"database/sql"
 	"errors"
-
-	"golang.org/x/crypto/bcrypt"
-	"theam.io/jdavidsanchez/test_crm_api/utils"
 )
 
 // Customer
@@ -18,36 +15,6 @@ type Customer struct {
 	// TODO: What about CreatedByUserId? Should we include time of creation/modification?
 	// pq.NullTime type
 }
-
-// User
-type User struct {
-	Id       int
-	Username string
-	Password string
-}
-
-type PicturePath struct {
-	Id   int    `json:"id"`
-	Path string `json:"picturePath"`
-}
-
-// // Handling null strings
-// type NullInt32 struct {
-// 	sql.NullInt32
-// }
-
-// func (ni NullInt32) MarshalJSON() ([]byte, error) {
-// 	if !ni.Valid {
-// 		return []byte("null"), nil
-// 	}
-// 	return json.Marshal(ni.Int32)
-// }
-
-// func (ni *NullInt32) UnmarshalJSON(b []byte) error {
-// 	err := json.Unmarshal(b, &ni.Int32)
-// 	ni.Valid = (err == nil)
-// 	return err
-// }
 
 // Functions for interacting with DB
 
@@ -123,40 +90,4 @@ func ListAllCustomers(db *sql.DB) ([]Customer, error) {
 	}
 
 	return customers, nil
-}
-
-func (u *User) CreateUser(db *sql.DB) error {
-	passwdHash, err := bcrypt.GenerateFromPassword([]byte(u.Password), 14)
-	utils.CheckErr(err)
-
-	err = db.QueryRow(`
-		INSERT INTO users (username, passwd)
-		VALUES ($1, $2)
-		RETURNING id
-		`, u.Username, passwdHash).Scan(&u.Id)
-
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *PicturePath) AddPicture(db *sql.DB) error {
-	err := db.QueryRow(`
-		INSERT INTO pictures (picturepath)
-		VALUES ($1)
-		RETURNING id
-		`, p.Path).Scan(&p.Id)
-
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *PicturePath) GetPicturePath(db *sql.DB) error {
-	return db.QueryRow(`
-		SELECT picturepath FROM pictures
-		WHERE id = $1
-		`, p.Id).Scan(&p.Path)
 }

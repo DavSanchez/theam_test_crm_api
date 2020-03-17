@@ -7,6 +7,7 @@ import (
 	"path"
 
 	_ "github.com/lib/pq"
+	"theam.io/jdavidsanchez/test_crm_api/models"
 	"theam.io/jdavidsanchez/test_crm_api/utils"
 )
 
@@ -28,7 +29,7 @@ func InitDB() {
 	_, err = DB.Exec(`
 		CREATE TABLE IF NOT EXISTS users (
 			id SERIAL PRIMARY KEY,
-			username VARCHAR(32) UNIQUE NOT NULL,
+			username VARCHAR(64) UNIQUE NOT NULL,
 			passwd BYTEA NOT NULL
 		)`)
 	utils.CheckErr(err)
@@ -36,7 +37,7 @@ func InitDB() {
 	_, err = DB.Exec(`
 		CREATE TABLE IF NOT EXISTS pictures (
 			id SERIAL PRIMARY KEY,
-			picturepath TEXT UNIQUE NOT NULL
+			picturePath TEXT UNIQUE NOT NULL
 		)`)
 	utils.CheckErr(err)
 
@@ -50,12 +51,12 @@ func InitDB() {
 		)`)
 	utils.CheckErr(err)
 
-	initialUser := User{
+	initialUser := models.User{
 		Username: "Admin",
-		Password: "Secret123",
+		Password: []byte("Secret123"),
 	}
-	noPicturePlaceholder := PicturePath{
-		Id: 1,
+	noPicturePlaceholder := models.PicturePath{
+		Id:   1,
 		Path: path.Join(utils.PathFileServer, "noPicturePlaceholder.jpg"),
 	}
 

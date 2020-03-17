@@ -6,13 +6,13 @@ import (
 	"os"
 	"time"
 
-	"theam.io/jdavidsanchez/test_crm_api/api"
 	"theam.io/jdavidsanchez/test_crm_api/db"
+	"theam.io/jdavidsanchez/test_crm_api/routes"
 )
 
 func init() {
 	db.InitDB()
-	api.InitRouter()
+	routes.InitRouter()
 }
 
 func main() {
@@ -20,8 +20,8 @@ func main() {
 	log.Printf("Starting server on :%s", port)
 
 	server := &http.Server{
-		Handler:      api.Router,
-		Addr:         ":" + port,
+		Handler: routes.Router,
+		Addr:    ":" + port,
 		// Adding timeouts
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
