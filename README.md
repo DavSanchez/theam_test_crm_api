@@ -51,7 +51,7 @@ For the HTTP requests, if any URL segment is a parameter, it will be enclosed in
 
 #### `GET /customers/all`
 Endpoint for getting a list of all customers in the system.
-```json
+```js
 (No customers) -> []
 (1+ customers) -> [
     {
@@ -72,7 +72,7 @@ Endpoint for getting a list of all customers in the system.
 
 #### `GET /customers/{customerId}`
 Endpoint for getting the customer of a specific `customerId`.
-```json
+```js
 (Existing customerId) -> {
         "id":customerId,
         "name":"customer_id_name",
@@ -87,7 +87,7 @@ Endpoint for getting the customer of a specific `customerId`.
 
 #### `POST /customers/create`
 Endpoint for creating a specific user in the system.
-```json
+```js
 (Created successfully) {
         "name":"new_customer_name",
         "surname":"new_customer_surname",
@@ -105,7 +105,7 @@ Endpoint for creating a specific user in the system.
 
 #### `PUT /customers/{customerId}`
 Endpoint for updating a specific user in the system.
-```json
+```js
 (Updated successfully) {
         "name":"updated_customer_name",
         "surname":"updated_customer_surname",
@@ -124,7 +124,7 @@ Endpoint for updating a specific user in the system.
 
 #### `DELETE /customers/{customerId}`
 Endpoint for deleting a specific user in the system.
-```json
+```js
 (Deleted successfully) * -> {"result":"success"}
 (Nonexistent {customerId}) * -> {"error":"No customer was deleted"}
 (Error) * -> {"error":"error_message"}
@@ -134,7 +134,7 @@ Endpoint for deleting a specific user in the system.
 
 #### `GET /customers/picture/{pictureId}`
 Endpoint for getting the picture path of a specific `pictureId`.
-```json
+```js
 (Existing pictureId) -> {
         "id":pictureId,
         "picturePath":"picture/id/path",
@@ -146,7 +146,7 @@ Endpoint for getting the picture path of a specific `pictureId`.
 
 #### `POST /customers/picture/create`
 Endpoint for creating a specific user in the system.
-```json
+```js
 (Uploaded and stored successfully) {
         "form_field": "valid_form_data",
         // ...
