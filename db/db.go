@@ -20,9 +20,10 @@ func InitDB() {
 	utils.CheckErr(err)
 
 	err = DB.Ping()
-
 	utils.CheckErr(err)
 	log.Print("Connected to database")
+
+	// First time initialization (// FIXME ?)
 
 	_, err = DB.Exec(`
 		CREATE TABLE IF NOT EXISTS users (
@@ -58,8 +59,8 @@ func InitDB() {
 		Path: path.Join(utils.PathFileServer, "noPicturePlaceholder.jpg"),
 	}
 
-	err = initialUser.InsertUserIfNotExists(DB)
+	err = initialUser.CreateUser(DB)
 	utils.CheckErr(err)
-	err = noPicturePlaceholder.AddPlaceholderPicture(DB)
+	err = noPicturePlaceholder.AddPicture(DB)
 	utils.CheckErr(err)
 }
