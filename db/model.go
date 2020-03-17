@@ -29,7 +29,7 @@ type User struct {
 
 type PicturePath struct {
 	Id   int    `json:"id"`
-	Path string `json:"picture"`
+	Path string `json:"picturePath"`
 }
 
 // // Handling null strings
