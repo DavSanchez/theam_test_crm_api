@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	"errors"
-	"log"
 
 	"golang.org/x/crypto/bcrypt"
 	"theam.io/jdavidsanchez/test_crm_api/utils"
