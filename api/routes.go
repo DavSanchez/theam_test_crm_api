@@ -119,25 +119,6 @@ func deleteCustomer(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseJSON(w, http.StatusOK, map[string]string{"result": "success"})
 }
 
-func addPicture(w http.ResponseWriter, r *http.Request) {
-
-	var p db.PicturePath
-	imageName, err := utils.FileUpload(r)
-	if err != nil {
-		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid data"})
-		return
-	}
-
-	p.Path = imageName
-	err = p.AddPicture(db.DB)
-	if err != nil {
-		utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
-		return
-	}
-
-	utils.ResponseJSON(w, http.StatusOK, p)
-}
-
 func getPicturePath(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["pictureId"])
@@ -159,6 +140,25 @@ func getPicturePath(w http.ResponseWriter, r *http.Request) {
 		default:
 			utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		}
+		return
+	}
+
+	utils.ResponseJSON(w, http.StatusOK, p)
+}
+
+func addPicture(w http.ResponseWriter, r *http.Request) {
+
+	var p db.PicturePath
+	imageName, err := utils.FileUpload(r)
+	if err != nil {
+		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid data"})
+		return
+	}
+
+	p.Path = imageName
+	err = p.AddPicture(db.DB)
+	if err != nil {
+		utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
 
