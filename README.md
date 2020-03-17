@@ -1,6 +1,6 @@
 # CRM API test for The Agile Monkeys.
 
-This repo contains my proposed solution to API Test - The CRM Service by The Agile Monkeys. It is written in Go.
+This repo contains my proposed solution to **API Test - The CRM Service** by **The Agile Monkeys**. It is written in **Go**.
 
 ## App features
 
@@ -163,4 +163,4 @@ Endpoint for creating a specific user in the system.
 // TODO
 
 ### ... and much more!
-I mean, this was done in a week, while working full time and with a world-spanning viral crisis in full force! Sure there is room for improvement :)
+I mean, this is being done in a week, while working full time and with a world-spanning viral crisis in full force! Sure there will be room for improvement :)
