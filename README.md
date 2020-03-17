@@ -37,28 +37,123 @@ The following libraries were used for the backend development:
 
 The API was implemented making use of `gorilla/mux`'s router, which allow matches incoming requests against a list of registered routes and calls a handler for the route that matches the URL or other conditions. All API endpoints return a JSON object, the details below define its content for each endpoint.
 
-### `GET /customers/all`
-// TODO
+For detailing the possible request inputs, conditions and outputs of the API endpoints, the following syntax is used:
 
-#### Possible endpoint improvements
-// TODO
+```
+(<condition?) <input?> -> <response>
+```
+
+For the HTTP requests, if any URL segment is a parameter, it will be enclosed in curly braces, `{variable}`, in the title and represented as `variable` in the example responses. For the example JSON responses, only descriptive values are used. No numeric value can be below `1`.
+
+### Customers
+
+#### `GET /customers/all`
+Endpoint for getting a list of all customers in the system.
+```json
+(No customers) -> []
+(1+ customers) -> [
+    {
+        "id":1,
+        "name":"Customer_1_name",
+        "surname":"Customer_1_surname",
+        "pictureId":1,
+        "lastModifiedByUserId":1
+    },
+    // ... (If more than 1 customer)
+]
+(Error) -> {"error": "error_message"}
+```
+
+<!-- #### Possible endpoint improvements
+// TODO -->
 
 
-### `GET /customers/{customerId}`
-// TODO
+#### `GET /customers/{customerId}`
+Endpoint for getting the customer of a specific `customerId`.
+```json
+(Existing customerId) -> {
+        "id":customerId,
+        "name":"customer_id_name",
+        "surname":"customer_id_surname",
+        "pictureId":1,
+        "lastModifiedByUserId":1
+}
+(No customers) -> {"error":"Customer not found"}
+(Error) -> {"error":"error_message"}
+```
 
 
-### `POST /customers/create`
-// TODO
+#### `POST /customers/create`
+Endpoint for creating a specific user in the system.
+```json
+(Created successfully) {
+        "name":"new_customer_name",
+        "surname":"new_customer_surname",
+        "pictureId":1,
+        "lastModifiedByUserId":1
+} -> {
+        "id":2,
+        "name":"new_customer_name",
+        "surname":"new_customer_surname",
+        "pictureId":1,
+        "lastModifiedByUserId":1
+}
+(Error) * -> {"error":"error_message"}
+```
+
+#### `PUT /customers/{customerId}`
+Endpoint for updating a specific user in the system.
+```json
+(Updated successfully) {
+        "name":"updated_customer_name",
+        "surname":"updated_customer_surname",
+        "pictureId":1,
+        "lastModifiedByUserId":1
+} -> {
+        "id":customerId,
+        "name":"updated_customer_name",
+        "surname":"updated_customer_surname",
+        "pictureId":1,
+        "lastModifiedByUserId":1
+}
+(Nonexistent {customerId}) * -> {"error":"No customer was updated"}
+(Error) * -> {"error":"error_message"}
+```
+
+#### `DELETE /customers/{customerId}`
+Endpoint for deleting a specific user in the system.
+```json
+(Deleted successfully) * -> {"result":"success"}
+(Nonexistent {customerId}) * -> {"error":"No customer was deleted"}
+(Error) * -> {"error":"error_message"}
+```
+
+### Pictures
+
+#### `GET /customers/picture/{pictureId}`
+Endpoint for getting the picture path of a specific `pictureId`.
+```json
+(Existing pictureId) -> {
+        "id":pictureId,
+        "picturePath":"picture/id/path",
+}
+(No picture) -> {"error":"Picture not found"}
+(Error) -> {"error":"error_message"}
+```
 
 
-### `PUT /customers/{customerId}`
-// TODO
-
-
-### `DELETE /customers/{customerId}`
-// TODO
-
+#### `POST /customers/picture/create`
+Endpoint for creating a specific user in the system.
+```json
+(Uploaded and stored successfully) {
+        "form_field": "valid_form_data",
+        // ...
+} -> {
+        "id":1,
+        "picturePath":"picture/id/path",
+}
+(Error) * -> {"error":"error_message"}
+```
 
 ## Further improvements
 
@@ -66,4 +161,4 @@ The API was implemented making use of `gorilla/mux`'s router, which allow matche
 // TODO
 
 ### ... and much more!
-I mean, this was done in a week, while working full time and with a world-spanning viral crisis in full force! Sure there is a lot to troubleshoot :)
+I mean, this was done in a week, while working full time and with a world-spanning viral crisis in full force! Sure there is room for improvement :)
