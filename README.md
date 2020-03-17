@@ -147,12 +147,9 @@ Endpoint for getting the picture path of a specific `pictureId`.
 #### `POST /customers/picture/create`
 Endpoint for creating a specific user in the system.
 ```js
-(Uploaded and stored successfully) {
-        "form_field": "valid_form_data",
-        // ...
-} -> {
+(Uploaded and stored successfully) [multipart_form] -> {
         "id":1,
-        "picturePath":"picture/id/path",
+        "picturePath":"picture/id/path.ext",
 }
 (Error) * -> {"error":"error_message"}
 ```
