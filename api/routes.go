@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -13,6 +14,35 @@ import (
 )
 
 var Router = mux.NewRouter()
+
+func InitRouter() {
+	// Customer subroute for the API
+	customers := Router.PathPrefix("/customers").Subrouter()
+
+	customers.HandleFunc("/all", listAllCustomers).Methods("GET")
+	customers.HandleFunc("/{customerId:[0-9]+}", getCustomer).Methods("GET")
+	customers.HandleFunc("/create", createCustomer).Methods("POST")
+	customers.HandleFunc("/{customerId:[0-9]+}", updateCustomer).Methods("PUT")
+	customers.HandleFunc("/{customerId:[0-9]+}", deleteCustomer).Methods("DELETE")
+	customers.HandleFunc("/picture/{pictureId}", getPicturePath).Methods("GET")
+	customers.HandleFunc("/picture", addPicture).Methods("POST")
+
+	// User authentication
+	users := Router.PathPrefix("/users").Subrouter()
+
+	users.HandleFunc("/register", registerUser).Methods("POST")
+	users.HandleFunc("/login", loginUser).Methods("POST")
+	users.HandleFunc("/logout", logoutUser).Methods("POST")
+
+	// Static files (customer pictures)
+	var dir string
+	flag.StringVar(&dir, "dir", "./"+utils.PathToImagesDir+"/", "Directory to serve the images")
+	Router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
+}
+
+/**************
+Customer routes
+***************/
 
 func listAllCustomers(w http.ResponseWriter, r *http.Request) {
 	customers, err := db.ListAllCustomers(db.DB)
@@ -119,6 +149,10 @@ func deleteCustomer(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseJSON(w, http.StatusOK, map[string]string{"result": "success"})
 }
 
+/*************
+Picture routes
+**************/
+
 func getPicturePath(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["pictureId"])
@@ -165,18 +199,16 @@ func addPicture(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseJSON(w, http.StatusOK, p)
 }
 
-func InitRouter() {
-	customers := Router.PathPrefix("/customers").Subrouter() // Customer subroute for the API
+/***************
+User auth routes
+****************/
 
-	customers.HandleFunc("/all", listAllCustomers).Methods("GET")
-	customers.HandleFunc("/{customerId:[0-9]+}", getCustomer).Methods("GET")
-	customers.HandleFunc("/create", createCustomer).Methods("POST")
-	customers.HandleFunc("/{customerId:[0-9]+}", updateCustomer).Methods("PUT")
-	customers.HandleFunc("/{customerId:[0-9]+}", deleteCustomer).Methods("DELETE")
-	customers.HandleFunc("/picture/{pictureId}", getPicturePath).Methods("GET")
-	customers.HandleFunc("/picture", addPicture).Methods("POST")
-
-	var dir string
-	flag.StringVar(&dir, "dir", "./img/", "Directory to serve the images")
-	Router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
+func registerUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Register user")
+}
+func loginUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Login user")
+}
+func logoutUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Logout user")
 }

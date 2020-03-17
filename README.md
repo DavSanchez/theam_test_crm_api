@@ -8,7 +8,7 @@ This repo contains my proposed solution to **API Test - The CRM Service** by **T
 
 The solution proposed makes use of a [PostgreSQL database](https://www.postgresql.org) provided by [its Docker image](https://hub.docker.com/_/postgres/), as part of a multi-container application managed with Docker Compose. The database feeds the API backend service, coded in Go, that is also enabled to run as a Docker container built from [its official image](https://hub.docker.com/_/golang/).
 
-This configuration makes possible to setup the whole architecture with one command, executed from the project's root directory:
+This configuration makes possible to setup the whole architecture with one command, provided Docker is installed, executed from the project's root directory:
 
 ```sh
 docker-compose up -d --build
@@ -153,6 +153,15 @@ Endpoint for uploading picture to the system.
 }
 (Error) * -> {"error":"error_message"}
 ```
+
+### User authentication and authorization
+
+#### `POST /users/register`
+
+#### `POST /users/login`
+
+#### `POST /users/logout`
+
 
 ## Further improvements
 
