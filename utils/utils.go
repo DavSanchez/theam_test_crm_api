@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	pathToImagesDir = "img"
+	PathToImagesDir = "img"
 	PathFileServer  = "static"
 )
 
@@ -26,12 +26,12 @@ func FileUpload(r *http.Request) (string, error) {
 	}
 	defer file.Close() // Close the file when finished
 
-	newFileName, err := generateRandomFilename(pathToImagesDir, handler.Filename)
+	newFileName, err := generateRandomFilename(PathToImagesDir, handler.Filename)
 	if err != nil {
 		log.Printf("Error creating file: %s", err.Error())
 		return "", err
 	}
-	f, _ := os.OpenFile(path.Join(pathToImagesDir, newFileName), os.O_WRONLY|os.O_CREATE, 0666)
+	f, _ := os.OpenFile(path.Join(PathToImagesDir, newFileName), os.O_WRONLY|os.O_CREATE, 0666)
 	defer f.Close()
 
 	io.Copy(f, file)
