@@ -22,6 +22,7 @@ services:
         build: ./
         environment:
             - DATABASE_URL=dbname=api user=docker password=docker host=postgres_db sslmode=disable
+            - JWT_SECRET=DOCKERSECRET
             - PORT=4000
         ports:
             - 4000:4000
