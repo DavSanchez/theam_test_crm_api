@@ -87,10 +87,10 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 	token := m["token"]
 
 	// Authenticated requests
-	t.Run("AUTH Get an empty customer list", func(t *testing.T) {
+	t.Run("AUTH Get list with no customers", func(t *testing.T) {
 		clearCustomersTable()
 		req, _ := http.NewRequest("GET", "/customers/all", nil)
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer ", token))
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
@@ -110,7 +110,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		}
 		data, _ := json.Marshal(newCustomer)
 		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBuffer(data))
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer ", token))
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 		response := executeRequest(t, req)
 
@@ -121,9 +121,9 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 			t.Errorf("Expected %s. Got %s", want, body)
 		}
 	})
-	t.Run("AUTH Get one customer", func(t *testing.T) {
+	t.Run("AUTH Get list with one customer", func(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/customers/all", nil)
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer ", token))
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
 		want := "[{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"lastModifiedByUserId\":1}]"
@@ -144,7 +144,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		}
 		data, _ := json.Marshal(newCustomer)
 		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBuffer(data))
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer ", token))
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 		response := executeRequest(t, req)
 
@@ -155,9 +155,9 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 			t.Errorf("Expected %s. Got %s", want, body)
 		}
 	})
-	t.Run("AUTHORIZED Get two customers", func(t *testing.T) {
+	t.Run("AUTHORIZED Get list with two customers", func(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/customers/all", nil)
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer ", token))
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
 		want := "[{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"lastModifiedByUserId\":1},{\"id\":2,\"name\":\"Test_Name_2\",\"surname\":\"Test_Surname_2\",\"pictureId\":1,\"lastModifiedByUserId\":1}]"
@@ -166,6 +166,48 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 
 		if body := response.Body.String(); body != want {
 			t.Errorf("Expected %s. Got %s", want, body)
+		}
+	})
+
+	t.Run("AUTH Get a non existing customer", func(t *testing.T) {
+		clearCustomersTable()
+		req, _ := http.NewRequest("GET", "/customers/22", nil)
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusNotFound, response.Code)
+
+		var m map[string]string
+		json.Unmarshal(response.Body.Bytes(), &m)
+		if m["error"] != "Customer not found" {
+			t.Errorf("Expected the 'error' key of the response to be set to 'Customer not found'. Got '%s'", m["error"])
+		}
+	})
+	t.Run("AUTH Get one customer", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/customers/1", nil)
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+		response := executeRequest(t, req)
+
+		want := "{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"lastModifiedByUserId\":1}"
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		if body := response.Body.String(); body != want {
+			t.Errorf("Expected %s. Got %s", want, body)
+		}
+	})
+	t.Run("AUTH Get a non valid ID parameter", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/customers/hola", nil)
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusNotFound, response.Code)
+
+		got := response.Body.Bytes()
+		want := []byte("404 page not found")
+		if reflect.DeepEqual(got, want) {
+			t.Errorf("Expected %s. Got '%s'", want, got)
 		}
 	})
 }
