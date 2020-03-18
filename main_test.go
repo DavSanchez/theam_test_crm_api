@@ -124,7 +124,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		got := response.Body.String()
 
 		if matched, _ := regexp.MatchString(want, got); !matched {
-			t.Logf("Response %v does not match expected format", got)
+			t.Logf("Response %v does not match expected format %q", got, want)
 			t.Fail()
 		}
 
