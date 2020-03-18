@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"unicode/utf8"
 
+	"theam.io/jdavidsanchez/test_crm_api/auth"
 	"theam.io/jdavidsanchez/test_crm_api/db"
 	"theam.io/jdavidsanchez/test_crm_api/models"
 	"theam.io/jdavidsanchez/test_crm_api/utils"
@@ -49,14 +50,13 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	id, err := u.LoginUser(db.DB)
+	err = u.LoginUser(db.DB)
 	if err != nil {
 		utils.ResponseJSON(w, http.StatusUnauthorized, map[string]string{"error": "Invalid credentials"})
 		return
 	}
 
-	utils.ResponseJSON(w, http.StatusAccepted, map[string]int{"id": id})
-
+	auth.SetJWT(u.Username, w, r)
 }
 
 func logoutUser(w http.ResponseWriter, r *http.Request) {

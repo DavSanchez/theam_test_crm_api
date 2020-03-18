@@ -12,12 +12,12 @@ import (
 // User
 type User struct {
 	Id       int
-	Username string
-	Password []byte
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 func (u *User) CreateUser(db *sql.DB) error {
-	passwdHash, err := bcrypt.GenerateFromPassword(u.Password, 14)
+	passwdHash, err := bcrypt.GenerateFromPassword([]byte(u.Password), 14)
 	utils.CheckErr(err)
 
 	_, err = db.Exec(`
@@ -37,17 +37,18 @@ func (u *User) CreateUser(db *sql.DB) error {
 	return nil
 }
 
-func (u *User) LoginUser(db *sql.DB) (id int, err error) {
-	var passwd []byte
-	err = db.QueryRow(`
-		SELECT id, passwd FROM users
+func (u *User) LoginUser(db *sql.DB) error {
+	passwd := []byte(u.Password)
+	err := db.QueryRow(`
+		SELECT id, username, passwd FROM users
 		WHERE username = $1
-		`, u.Username).Scan(id, passwd)
-	err = bcrypt.CompareHashAndPassword(passwd, u.Password)
+		`, u.Username).Scan(&u.Id, &u.Username, &u.Password)
+
+	err = bcrypt.CompareHashAndPassword([]byte(u.Password), passwd)
 	if err == bcrypt.ErrMismatchedHashAndPassword {
-		return 0, errors.New("Invalid credentials")
+		return errors.New("Invalid credentials")
 	} else if err != nil {
-		return 0, err
+		return err
 	}
-	return id, nil
+	return nil
 }

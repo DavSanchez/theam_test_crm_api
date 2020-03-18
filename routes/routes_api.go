@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"theam.io/jdavidsanchez/test_crm_api/auth"
 	"theam.io/jdavidsanchez/test_crm_api/utils"
 )
 
@@ -32,5 +33,10 @@ func InitRouter() {
 	// Static files (customer pictures)
 	var dir string
 	flag.StringVar(&dir, "dir", "./"+utils.PathToImagesDir+"/", "Directory to serve the images")
-	Router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
+	pictures := Router.PathPrefix("/static/").Subrouter()
+	pictures.Handle("/", http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
+
+	// Registering JWT middleware, Do It Yourself Style!
+	customers.Use(auth.ValidateToken)
+	pictures.Use(auth.ValidateToken)
 }
