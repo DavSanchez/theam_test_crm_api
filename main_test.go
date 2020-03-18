@@ -392,6 +392,25 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 			t.Errorf("Expected %s. Got '%s'", want, got)
 		}
 	})
+		t.Run("AUTH Upload a picture", func(t *testing.T) {
+		// Attempt to upload picture
+		b, w := createPictureMultiPartForm(t, "./tests/assets/theam_test_arch.png")
+
+		req, _ := http.NewRequest("POST", "/customers/picture/upload", &b)
+		req.Header.Set("Content-Type", w.FormDataContentType())
+
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		want := `\{"id":[0-9]+,"picturePath":"static/[0-9]+\.(?:jpg|png)"}`
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		if body := response.Body.String(); body != want {
+			t.Errorf("Expected %s. Got %s", want, body)
+		}
+	})
 }
 
 func clearCustomersTable() {
