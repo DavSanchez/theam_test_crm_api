@@ -371,12 +371,15 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
-		want := "{\"id\":1,\"picturePath\":\"///\"}"
+		want := `\{"id":[0-9]+,"picturePath":"static/[0-9]+\.(?:jpg|png)"}`
+		got := response.Body.String()
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
-		if body := response.Body.String(); body != want {
-			t.Errorf("Expected %s. Got %s", want, body)
+		if matched, err := regexp.MatchString(want, got); !matched {
+			t.Logf("Response %v does not match expected format: %v", got, want)
+			t.Logf("Regexp error: %q", err.Error())
+			t.Fail()
 		}
 	})
 	t.Run("AUTH Get a non valid ID parameter", func(t *testing.T) {
