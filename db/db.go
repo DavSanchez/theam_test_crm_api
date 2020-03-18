@@ -53,7 +53,7 @@ func InitDB() {
 
 	initialUser := models.User{
 		Username: "Admin",
-		Password: "Secret123",
+		Password: "hunter2",
 	}
 	noPicturePlaceholder := models.PicturePath{
 		Id:   1,
