@@ -20,7 +20,7 @@ func InitRouter() {
 	customers.HandleFunc("/create", createCustomer).Methods("POST")
 	customers.HandleFunc("/{customerId:[0-9]+}", updateCustomer).Methods("PUT")
 	customers.HandleFunc("/{customerId:[0-9]+}", deleteCustomer).Methods("DELETE")
-	customers.HandleFunc("/picture/{pictureId}", getPicturePath).Methods("GET")
+	customers.HandleFunc("/picture/{pictureId:[0-9]+}", getPicturePath).Methods("GET")
 	customers.HandleFunc("/picture/upload", addPicture).Methods("POST")
 
 	// User authentication
