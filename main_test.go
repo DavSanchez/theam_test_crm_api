@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -20,11 +22,8 @@ import (
 // Integration test (test the API and its connection with the database)
 
 func TestMain(m *testing.M) {
-
 	code := m.Run()
-
 	clearCustomersTable()
-
 	os.Exit(code)
 }
 
@@ -300,6 +299,101 @@ func Test_Auth_User_Routes(t *testing.T) {
 	clearAdditionalUsers()
 }
 
+func Test_Non_Auth_Picture_Routes(t *testing.T) {
+	t.Run("NO_AUTH Upload picture", func(t *testing.T) {
+		// Attempt to upload picture
+		b, w := createPictureMultiPartForm(t, "./tests/assets/theam_test_arch.png")
+
+		req, _ := http.NewRequest("POST", "/customers/picture/upload", &b)
+		req.Header.Set("Content-Type", w.FormDataContentType())
+
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusUnauthorized, response.Code)
+
+		got := response.Body.String()
+		want := "Unauthorized\n"
+		if got != want {
+			t.Errorf("Expected %q response. Got %q", want, got)
+		}
+	})
+	t.Run("NO_AUTH Get all customers", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/customers/picture/1", nil)
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusUnauthorized, response.Code)
+
+		got := response.Body.String()
+		want := "Unauthorized\n"
+		if got != want {
+			t.Errorf("Expected %q response. Got %q", want, got)
+		}
+	})
+}
+
+func Test_Auth_Picture_Routes(t *testing.T) {
+	var token string
+	// Authenticating and getting token
+	t.Run("Authenticate existing user", func(t *testing.T) {
+		user := models.User{
+			Username: "Admin",
+			Password: "hunter2",
+		}
+		response := authenticateUser(t, user)
+
+		matchJwtToken(t, response.Body.String())
+
+		m := make(map[string]string)
+		err := json.NewDecoder(response.Body).Decode(&m)
+		if err != nil {
+			t.Fatalf("Error decoding response body: %q", err.Error())
+		}
+		token = m["token"]
+	})
+
+	// Authenticated requests
+	t.Run("AUTH Get a non existing customer", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/customers/22", nil)
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusNotFound, response.Code)
+
+		var m map[string]string
+		json.Unmarshal(response.Body.Bytes(), &m)
+		if m["error"] != "Customer not found" {
+			t.Errorf("Expected the 'error' key of the response to be set to 'Customer not found'. Got '%s'", m["error"])
+		}
+	})
+	t.Run("AUTH Get one customer", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/customers/1", nil)
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+		response := executeRequest(t, req)
+
+		want := "{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"lastModifiedByUserId\":1}"
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		if body := response.Body.String(); body != want {
+			t.Errorf("Expected %s. Got %s", want, body)
+		}
+	})
+	t.Run("AUTH Get a non valid ID parameter", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/customers/hola", nil)
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusNotFound, response.Code)
+
+		got := response.Body.Bytes()
+		want := []byte("404 page not found")
+		if reflect.DeepEqual(got, want) {
+			t.Errorf("Expected %s. Got '%s'", want, got)
+		}
+	})
+}
+
 func clearCustomersTable() {
 	_, err := db.DB.Exec("DELETE FROM customers")
 	if err != nil {
@@ -351,4 +445,27 @@ func matchJwtToken(t *testing.T, body string) {
 		t.Logf("Regexp error: %q", err.Error())
 		t.Fail()
 	}
+}
+
+func createPictureMultiPartForm(t *testing.T, fileName string) (bytes.Buffer, *multipart.Writer) {
+	t.Helper()
+	var b bytes.Buffer
+	mpWriter := multipart.NewWriter(&b)
+
+	file, err := os.Open(fileName)
+	if err != nil {
+		pwd, _ := os.Getwd()
+		t.Fatalf("Directory: %s", pwd)
+	}
+
+	formFile, err := mpWriter.CreateFormFile("picture", file.Name())
+	if err != nil {
+		t.Fatalf("Error creating writer: %v", err)
+	}
+	if _, err = io.Copy(formFile, file); err != nil {
+		t.Fatalf("Error in io.Copy: %v", err)
+	}
+	mpWriter.Close()
+	return b, mpWriter
+
 }

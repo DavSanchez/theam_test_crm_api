@@ -144,7 +144,7 @@ Endpoint for getting the picture path of a specific `pictureId`.
 ```
 
 
-#### `POST /customers/picture/create`
+#### `POST /customers/picture/`
 Endpoint for uploading picture to the system.
 ```js
 (Uploaded and stored successfully) [multipart_form] -> {
@@ -159,8 +159,6 @@ Endpoint for uploading picture to the system.
 #### `POST /users/register`
 
 #### `POST /users/login`
-
-#### `POST /users/logout`
 
 
 ## Further improvements

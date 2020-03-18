@@ -38,5 +38,5 @@ func InitRouter() {
 
 	// Registering JWT middleware, Do It Yourself Style!
 	customers.Use(auth.ValidateToken)
-	pictures.Use(auth.ValidateToken)
+	//pictures.Use(auth.ValidateToken)
 }
