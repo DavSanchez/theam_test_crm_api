@@ -36,6 +36,7 @@ The following libraries were used for the backend development:
 - `gorilla/mux`: Provides the route handling via its HTTP request multiplexer.
 - `lib/pq`: Go database driver for PostgreSQL.
 - `crypto/bcrypt`: Cryptographic library for hashing and comparing passwords.
+- `dgrijalva/jwt-go`: Go implementation of JSON Web Tokens (JWT)
 
 ## <a name="API_endpoints"></a>API endpoints
 

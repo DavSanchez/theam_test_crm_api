@@ -371,7 +371,7 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
-		want := `\{"id":[0-9]+,"picturePath":"static/[0-9]+\.(?:jpg|png)"}`
+		want := `\{"id":[0-9]+,"picturePath":"static/noPicturePlaceholder.jpg"}`
 		got := response.Body.String()
 
 		checkResponseCode(t, http.StatusOK, response.Code)
@@ -406,6 +406,22 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 		response := executeRequest(t, req)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
+
+		want := `\{"id":[0-9]+,"picturePath":"static/[0-9]+\.(?:jpg|png)"}`
+		got := response.Body.String()
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		if matched, err := regexp.MatchString(want, got); !matched {
+			t.Logf("Response %v does not match expected format: %v", got, want)
+			t.Logf("Regexp error: %q", err.Error())
+			t.Fail()
+		}
+	})
+		t.Run("AUTH Get one picture", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/customers/picture/1", nil)
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+		response := executeRequest(t, req)
 
 		want := `\{"id":[0-9]+,"picturePath":"static/[0-9]+\.(?:jpg|png)"}`
 		got := response.Body.String()
