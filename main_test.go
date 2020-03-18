@@ -124,7 +124,8 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		got := response.Body.String()
 
 		if matched, _ := regexp.MatchString(want, got); !matched {
-			t.Fatalf("Response %v does not match expected format", got)
+			t.Logf("Response %v does not match expected format", got)
+			t.Fail()
 		}
 
 		m := make(map[string]string)
@@ -204,7 +205,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 			t.Errorf("Expected %s. Got %s", want, body)
 		}
 	})
-	t.Run("AUTHORIZED Get list with two customers", func(t *testing.T) {
+	t.Run("AUTH Get list with two customers", func(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/customers/all", nil)
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
@@ -292,11 +293,13 @@ func Test_Auth_User_Routes(t *testing.T) {
 	})
 
 	t.Run("Register new user", func(t *testing.T) {
-		user := models.User{
+		anotherUser := models.User{
 			Username: "Admin_ANOTHER",
 			Password: "hunter2_ANOTHER",
 		}
-		response := authenticateUser(t, user)
+		data, _ := json.Marshal(anotherUser)
+		req, _ := http.NewRequest("POST", "/users/register", bytes.NewBufferString(string(data)))
+		response := executeRequest(t, req)
 
 		want := "{\"result\":\"success\"}"
 		got := response.Body.String()
@@ -305,6 +308,7 @@ func Test_Auth_User_Routes(t *testing.T) {
 			t.Fatalf("Expected response was %q, got %q", want, got)
 		}
 	})
+	clearAdditionalUsers()
 }
 
 func clearCustomersTable() {
@@ -316,6 +320,17 @@ func clearCustomersTable() {
 	if err != nil {
 		fmt.Print(err.Error())
 	}
+}
+
+func clearAdditionalUsers() {
+	_, err := db.DB.Exec("DELETE FROM users WHERE id > 1")
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+	// _, err = db.DB.Exec("ALTER SEQUENCE customers_id_seq RESTART WITH 1")
+	// if err != nil {
+	// 	fmt.Print(err.Error())
+	// }
 }
 
 func executeRequest(t *testing.T, req *http.Request) *httptest.ResponseRecorder {
