@@ -36,8 +36,10 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 
 		checkResponseCode(t, http.StatusUnauthorized, response.Code)
 
-		if body := response.Body.String(); body != "Unauthorized" {
-			t.Errorf("Expected Unauthorized response. Got %s", body)
+		got := response.Body.String()
+		want := "Unauthorized\n"
+		if got != want {
+			t.Errorf("Expected %q response. Got %q", want, got)
 		}
 	})
 	t.Run("NO_AUTH Get customer", func(t *testing.T) {
@@ -47,8 +49,10 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 
 		checkResponseCode(t, http.StatusUnauthorized, response.Code)
 
-		if body := response.Body.String(); body != "Unauthorized" {
-			t.Errorf("Expected Unauthorized response. Got %s", body)
+		got := response.Body.String()
+		want := "Unauthorized\n"
+		if got != want {
+			t.Errorf("Expected %q response. Got %q", want, got)
 		}
 	})
 	t.Run("NO_AUTH Create customer", func(t *testing.T) {
@@ -66,8 +70,10 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 
 		checkResponseCode(t, http.StatusUnauthorized, response.Code)
 
-		if body := response.Body.String(); body != "Unauthorized" {
-			t.Errorf("Expected Unauthorized response. Got %s", body)
+		got := response.Body.String()
+		want := "Unauthorized\n"
+		if got != want {
+			t.Errorf("Expected %q response. Got %q", want, got)
 		}
 	})
 }
