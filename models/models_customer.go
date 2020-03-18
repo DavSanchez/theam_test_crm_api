@@ -12,7 +12,7 @@ type Customer struct {
 	Surname              string `json:"surname"`
 	PictureId            int    `json:"pictureId"`
 	CreatedByUserId      int    `json:"createdByUserId"`
-	LastModifiedByUserId *int   `json:"lastModifiedByUserId"`
+	LastModifiedByUserId int    `json:"lastModifiedByUserId"`
 }
 
 // Functions for interacting with DB
