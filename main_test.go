@@ -420,7 +420,7 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 		var ok bool
 		uploadedPictureId, ok = m["picturePath"].(int)
 		if !ok {
-			t.Fatalf("Could not parse response body %v", m)
+			t.Fatalf("Could not parse response body %v. Got ID: %v", m, uploadedPictureId)
 		}
 	})
 	t.Run("AUTH Get one picture", func(t *testing.T) {
