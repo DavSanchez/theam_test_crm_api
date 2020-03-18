@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"reflect"
+	"regexp"
 	"strconv"
 	"testing"
 
@@ -29,34 +30,8 @@ func TestMain(m *testing.M) {
 
 func Test_Non_Auth_Customer_Routes(t *testing.T) {
 	// Unauthenticated requests
-	t.Run("NO_AUTH Get all customers", func(t *testing.T) {
-		clearCustomersTable()
-		req, _ := http.NewRequest("GET", "/customers/all", nil)
-		response := executeRequest(t, req)
-
-		checkResponseCode(t, http.StatusUnauthorized, response.Code)
-
-		got := response.Body.String()
-		want := "Unauthorized\n"
-		if got != want {
-			t.Errorf("Expected %q response. Got %q", want, got)
-		}
-	})
-	t.Run("NO_AUTH Get customer", func(t *testing.T) {
-		clearCustomersTable()
-		req, _ := http.NewRequest("GET", "/customers/22", nil)
-		response := executeRequest(t, req)
-
-		checkResponseCode(t, http.StatusUnauthorized, response.Code)
-
-		got := response.Body.String()
-		want := "Unauthorized\n"
-		if got != want {
-			t.Errorf("Expected %q response. Got %q", want, got)
-		}
-	})
+	clearCustomersTable()
 	t.Run("NO_AUTH Create customer", func(t *testing.T) {
-		clearCustomersTable()
 		// Add one customer
 		newCustomer := models.Customer{
 			Name:                 "Test_Name",
@@ -76,23 +51,89 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 			t.Errorf("Expected %q response. Got %q", want, got)
 		}
 	})
+	t.Run("NO_AUTH Get all customers", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/customers/all", nil)
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusUnauthorized, response.Code)
+
+		got := response.Body.String()
+		want := "Unauthorized\n"
+		if got != want {
+			t.Errorf("Expected %q response. Got %q", want, got)
+		}
+	})
+	t.Run("NO_AUTH Get customer", func(t *testing.T) {
+		clearCustomersTable()
+		req, _ := http.NewRequest("GET", "/customers/1", nil)
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusUnauthorized, response.Code)
+
+		got := response.Body.String()
+		want := "Unauthorized\n"
+		if got != want {
+			t.Errorf("Expected %q response. Got %q", want, got)
+		}
+	})
+	t.Run("NO_AUTH Update customer", func(t *testing.T) {
+		newCustomer := models.Customer{
+			Name:                 "Test_Name_MODIFIED",
+			Surname:              "Test_Surname_MODIFIED",
+			PictureId:            1,
+			LastModifiedByUserId: 1,
+		}
+		data, _ := json.Marshal(newCustomer)
+		req, _ := http.NewRequest("PUT", "/customers/1", bytes.NewBufferString(string(data)))
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusUnauthorized, response.Code)
+
+		got := response.Body.String()
+		want := "Unauthorized\n"
+		if got != want {
+			t.Errorf("Expected %q response. Got %q", want, got)
+		}
+	})
+	t.Run("NO_AUTH Delete customer", func(t *testing.T) {
+		req, _ := http.NewRequest("DELETE", "/customers/1", nil)
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusUnauthorized, response.Code)
+
+		got := response.Body.String()
+		want := "Unauthorized\n"
+		if got != want {
+			t.Errorf("Expected %q response. Got %q", want, got)
+		}
+	})
 }
 
 func Test_Auth_Customer_Routes(t *testing.T) {
+	clearCustomersTable()
+	var token string
 	// Authenticating and getting token
-	user := models.User{
-		Username: "Admin",
-		Password: "hunter2",
-	}
-	res := authenticateUser(t, user)
-	m := make(map[string]interface{})
-	err := json.NewDecoder(res.Body).Decode(&m)
-	if err != nil {
-		t.Fatalf("Aborting tests: %q", err.Error())
-	}
-	t.Logf("JSON decoded: %+v", m)
-	token := m["token"]
-	t.Logf("Token received from login: %s", token)
+	t.Run("Authenticate existing user", func(t *testing.T) {
+		user := models.User{
+			Username: "Admin",
+			Password: "hunter2",
+		}
+		response := authenticateUser(t, user)
+
+		want := "{\"result\":\"success\", \"token\":\"^[A-Za-z0-9-_=]+.[A-Za-z0-9-_=]+.?[A-Za-z0-9-_.+/=]*$\"}"
+		got := response.Body.String()
+
+		if matched, _ := regexp.MatchString(want, got); !matched {
+			t.Fatalf("Response %v does not match expected format", got)
+		}
+
+		m := make(map[string]string)
+		err := json.NewDecoder(response.Body).Decode(&m)
+		if err != nil {
+			t.Fatalf("Error decoding response body: %q", err.Error())
+		}
+		token = m["token"]
+	})
 
 	// Authenticated requests
 	t.Run("AUTH Get list with no customers", func(t *testing.T) {
@@ -219,12 +260,51 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 	})
 }
 
-func Test_Route_Customer_updateCustomer(t *testing.T) {
-	// TODO: not implemented
-}
+func Test_Auth_User_Routes(t *testing.T) {
+	t.Run("Authenticate existing user", func(t *testing.T) {
+		user := models.User{
+			Username: "Admin",
+			Password: "hunter2",
+		}
+		response := authenticateUser(t, user)
 
-func Test_Route_Customer_deleteCustomer(t *testing.T) {
-	// TODO: not implemented
+		want := "{\"result\":\"success\", \"token\":\"^[A-Za-z0-9-_=]+.[A-Za-z0-9-_=]+.?[A-Za-z0-9-_.+/=]*$\"}"
+		got := response.Body.String()
+
+		if matched, _ := regexp.MatchString(want, got); !matched {
+			t.Fatalf("Response %v does not match expected format", got)
+		}
+	})
+
+	t.Run("Authenticate invalid user", func(t *testing.T) {
+		user := models.User{
+			Username: "Admin_NOT_EXISTS",
+			Password: "hunter2",
+		}
+		response := authenticateUser(t, user)
+
+		want := "{\"error\":\"Invalid credentials\"}"
+		got := response.Body.String()
+
+		if got != want {
+			t.Fatalf("Expected response was %q, got %q", want, got)
+		}
+	})
+
+	t.Run("Register new user", func(t *testing.T) {
+		user := models.User{
+			Username: "Admin_ANOTHER",
+			Password: "hunter2_ANOTHER",
+		}
+		response := authenticateUser(t, user)
+
+		want := "{\"result\":\"success\"}"
+		got := response.Body.String()
+
+		if got != want {
+			t.Fatalf("Expected response was %q, got %q", want, got)
+		}
+	})
 }
 
 func clearCustomersTable() {

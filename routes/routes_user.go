@@ -36,7 +36,7 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.ResponseJSON(w, http.StatusCreated, map[string]string{"result": "Success"})
+	utils.ResponseJSON(w, http.StatusCreated, map[string]string{"result": "success"})
 }
 
 func loginUser(w http.ResponseWriter, r *http.Request) {
