@@ -333,6 +333,7 @@ func Test_Non_Auth_Picture_Routes(t *testing.T) {
 
 func Test_Auth_Picture_Routes(t *testing.T) {
 	var token string
+	var uploadedPictureId int
 	// Authenticating and getting token
 	t.Run("Authenticate existing user", func(t *testing.T) {
 		user := models.User{
@@ -413,9 +414,17 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 			t.Logf("Regexp error: %q", err.Error())
 			t.Fail()
 		}
+
+		var m map[string]interface{}
+		json.Unmarshal(response.Body.Bytes(), &m)
+		var ok bool
+		uploadedPictureId, ok = m["picturePath"].(int)
+		if !ok {
+			t.Fatalf("Could not parse response body %v", m)
+		}
 	})
 	t.Run("AUTH Get one picture", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/customers/picture/1", nil)
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/customers/picture/%s", string(uploadedPictureId)), nil)
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
