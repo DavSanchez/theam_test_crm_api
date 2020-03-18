@@ -28,7 +28,7 @@ func (c *Customer) GetCustomer(db *sql.DB) error {
 func (c *Customer) CreateCustomer(db *sql.DB) error {
 	err := db.QueryRow(`
 		INSERT INTO customers (customername, surname, pictureId, createdByUserId, lastModifiedByUserId)
-		VALUES ($1, $2, $3, $4, NULL)
+		VALUES ($1, $2, $3, $4, $4)
 		RETURNING id
 		`, c.Name, c.Surname, c.PictureId, c.CreatedByUserId).Scan(&c.Id)
 

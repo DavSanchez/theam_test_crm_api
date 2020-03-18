@@ -194,7 +194,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		response := executeRequest(t, req)
 
 		checkResponseCode(t, http.StatusCreated, response.Code)
-		want := "{\"id\":2,\"name\":\"Test_Name_2\",\"surname\":\"Test_Surname_2\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":null\"lastModifiedByUserId\":1}"
+		want := "{\"id\":2,\"name\":\"Test_Name_2\",\"surname\":\"Test_Surname_2\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":1\"lastModifiedByUserId\":1}"
 
 		if body := response.Body.String(); body != want {
 			t.Errorf("Expected %s. Got %s", want, body)
@@ -205,7 +205,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
-		want := "[{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":null},{\"id\":2,\"name\":\"Test_Name_2\",\"surname\":\"Test_Surname_2\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":null}]"
+		want := "[{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":1},{\"id\":2,\"name\":\"Test_Name_2\",\"surname\":\"Test_Surname_2\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":1}]"
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -233,7 +233,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
-		want := "{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":null}"
+		want := "{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":1}"
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
