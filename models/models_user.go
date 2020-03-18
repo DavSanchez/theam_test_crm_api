@@ -39,12 +39,12 @@ func (u *User) CreateUser(db *sql.DB) error {
 
 func (u *User) LoginUser(db *sql.DB) error {
 	passwd := []byte(u.Password)
-	err := db.QueryRow(`
+	_ = db.QueryRow(`
 		SELECT id, username, passwd FROM users
 		WHERE username = $1
 		`, u.Username).Scan(&u.Id, &u.Username, &u.Password)
 
-	err = bcrypt.CompareHashAndPassword([]byte(u.Password), passwd)
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), passwd)
 	if err == bcrypt.ErrMismatchedHashAndPassword {
 		return errors.New("Invalid credentials")
 	} else if err != nil {

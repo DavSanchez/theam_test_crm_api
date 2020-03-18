@@ -42,7 +42,6 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 			Name:                 "Test_Name",
 			Surname:              "Test_Surname",
 			PictureId:            1,
-			LastModifiedByUserId: 1,
 		}
 		data, _ := json.Marshal(newCustomer)
 		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
@@ -86,7 +85,6 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 			Name:                 "Test_Name_MODIFIED",
 			Surname:              "Test_Surname_MODIFIED",
 			PictureId:            1,
-			LastModifiedByUserId: 1,
 		}
 		data, _ := json.Marshal(newCustomer)
 		req, _ := http.NewRequest("PUT", "/customers/1", bytes.NewBufferString(string(data)))
