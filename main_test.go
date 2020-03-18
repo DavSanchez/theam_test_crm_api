@@ -418,9 +418,9 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 		var m map[string]interface{}
 		json.Unmarshal(response.Body.Bytes(), &m)
 		var ok bool
-		uploadedPictureId, ok = m["picturePath"].(int)
+		uploadedPictureId, ok = m["id"].(int)
 		if !ok {
-			t.Fatalf("Could not parse response body %v. Got ID: %v", m, uploadedPictureId)
+			t.Fatalf("Could not parse response body %+v. Got ID: %+v", m, uploadedPictureId)
 		}
 	})
 	t.Run("AUTH Get one picture", func(t *testing.T) {
@@ -454,6 +454,21 @@ func clearCustomersTable() {
 
 func clearAdditionalUsers() {
 	_, err := db.DB.Exec("DELETE FROM users WHERE id > 1")
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+		_, err = db.DB.Exec("ALTER SEQUENCE users_id_seq RESTART WITH 2")
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+}
+
+func clearAdditionalPictures() {
+	_, err := db.DB.Exec("DELETE FROM pictures WHERE id > 1")
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+		_, err = db.DB.Exec("ALTER SEQUENCE picturess_id_seq RESTART WITH 2")
 	if err != nil {
 		fmt.Print(err.Error())
 	}
