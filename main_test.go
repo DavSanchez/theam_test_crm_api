@@ -120,11 +120,11 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		}
 		response := authenticateUser(t, user)
 
-		want := `{"result":"success","token":"^[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_.+/=]*?$"}`
+		want := `\{"result":"success","token":"[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_.+/=]*?"\}`
 		got := response.Body.String()
 
 		if matched, _ := regexp.MatchString(want, got); !matched {
-			t.Logf("Response %v does not match expected format", got)
+			t.Logf("Response %v does not match expected format %v", got, want)
 			t.Fail()
 		}
 
