@@ -18,7 +18,7 @@ type Claims struct {
 }
 
 func SetJWT(username string, w http.ResponseWriter, r *http.Request) {
-	expirationTime := time.Now().Add(10 * time.Minute)
+	expirationTime := time.Now().Add(5 * time.Minute)
 
 	claims := &Claims{
 		Username: username,
@@ -72,6 +72,7 @@ func ValidateToken(next http.Handler) http.Handler {
 	})
 }
 
+/*
 func RefreshToken(w http.ResponseWriter, r *http.Request) {
 	var token string
 	tokens, ok := r.Header["Authorization"]
@@ -117,3 +118,4 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 
 	utils.ResponseJSON(w, http.StatusAccepted, map[string]string{"result": "success", "token": tokenString})
 }
+*/

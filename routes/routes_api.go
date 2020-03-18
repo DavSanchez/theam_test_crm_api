@@ -28,7 +28,7 @@ func InitRouter() {
 
 	users.HandleFunc("/register", registerUser).Methods("POST")
 	users.HandleFunc("/login", loginUser).Methods("POST")
-	users.HandleFunc("/logout", logoutUser).Methods("POST")
+	// users.HandleFunc("/logout", logoutUser).Methods("POST")
 
 	// Static files (customer pictures)
 	var dir string
