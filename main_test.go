@@ -398,6 +398,7 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 
 		req, _ := http.NewRequest("POST", "/customers/picture/upload", &b)
 		req.Header.Set("Content-Type", w.FormDataContentType())
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 		response := executeRequest(t, req)
 
