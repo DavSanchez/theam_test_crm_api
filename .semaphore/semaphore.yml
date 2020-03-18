@@ -1,0 +1,26 @@
+version: v1.0
+name: Go
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+  - name: Test
+    task:
+      jobs:
+        - name: go test
+          commands:
+            - sem-service start postgres --username=semaphore --password=semaphore --db=api
+            - sem-version go 1.11
+            - export GO111MODULE=on
+            - export GOPATH=~/go
+            - 'export PATH=/home/semaphore/go/bin:$PATH'
+            - checkout
+            - go get ./...
+            - go test -v ./...
+            - go build -v .
+      env_vars:
+        - name: JWT_SECRET
+          value: TESTSECRET
+        - name: DATABASE_URL
+          value: dbname=api user=semaphore password=semaphore sslmode=disable
