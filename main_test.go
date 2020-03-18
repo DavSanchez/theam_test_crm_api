@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"theam.io/jdavidsanchez/test_crm_api/db"
@@ -18,6 +19,7 @@ import (
 // Integration test (test the API and its connection with the database)
 
 func TestMain(m *testing.M) {
+
 	code := m.Run()
 
 	clearCustomersTable()
@@ -25,19 +27,31 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func Test_Route_Customer_listAllCustomers(t *testing.T) {
-	t.Run("Get an empty customer list", func(t *testing.T) {
+func Test_Non_Auth_Customer_Routes(t *testing.T) {
+	// Unauthenticated requests
+	t.Run("NO_AUTH Get all customers", func(t *testing.T) {
 		clearCustomersTable()
 		req, _ := http.NewRequest("GET", "/customers/all", nil)
 		response := executeRequest(t, req)
 
-		checkResponseCode(t, http.StatusOK, response.Code)
+		checkResponseCode(t, http.StatusUnauthorized, response.Code)
 
-		if body := response.Body.String(); body != "[]" {
-			t.Errorf("Expected an empty array. Got %s", body)
+		if body := response.Body.String(); body != "Unauthorized" {
+			t.Errorf("Expected Unauthorized response. Got %s", body)
 		}
 	})
-	t.Run("Get one customer", func(t *testing.T) {
+	t.Run("NO_AUTH Get customer", func(t *testing.T) {
+		clearCustomersTable()
+		req, _ := http.NewRequest("GET", "/customers/22", nil)
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusUnauthorized, response.Code)
+
+		if body := response.Body.String(); body != "Unauthorized" {
+			t.Errorf("Expected Unauthorized response. Got %s", body)
+		}
+	})
+	t.Run("NO_AUTH Create customer", func(t *testing.T) {
 		clearCustomersTable()
 		// Add one customer
 		newCustomer := models.Customer{
@@ -47,10 +61,69 @@ func Test_Route_Customer_listAllCustomers(t *testing.T) {
 			LastModifiedByUserId: 1,
 		}
 		data, _ := json.Marshal(newCustomer)
-		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
-		executeRequest(t, req)
+		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBuffer(data))
+		response := executeRequest(t, req)
 
-		req, _ = http.NewRequest("GET", "/customers/all", nil)
+		checkResponseCode(t, http.StatusUnauthorized, response.Code)
+
+		if body := response.Body.String(); body != "Unauthorized" {
+			t.Errorf("Expected Unauthorized response. Got %s", body)
+		}
+	})
+}
+
+func Test_Auth_Customer_Routes(t *testing.T) {
+	// Authenticating and getting token
+	user := models.User{
+		Username: "Admin",
+		Password: "Secret123",
+	}
+	res := authenticateUser(t, user)
+	m := make(map[string]interface{})
+	err := json.NewDecoder(res.Body).Decode(&m)
+	if err != nil {
+		t.Fatalf("Aborting tests: %q", err.Error())
+	}
+	token := m["token"]
+
+	// Authenticated requests
+	t.Run("AUTH Get an empty customer list", func(t *testing.T) {
+		clearCustomersTable()
+		req, _ := http.NewRequest("GET", "/customers/all", nil)
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer ", token))
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		if body := response.Body.String(); body != "[]" {
+			t.Errorf("Expected an empty array. Got %s", body)
+		}
+	})
+	t.Run("AUTH Create one customer", func(t *testing.T) {
+		clearCustomersTable()
+		// Add one customer
+		newCustomer := models.Customer{
+			Name:                 "Test_Name",
+			Surname:              "Test_Surname",
+			PictureId:            1,
+			LastModifiedByUserId: 1,
+		}
+		data, _ := json.Marshal(newCustomer)
+		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBuffer(data))
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer ", token))
+
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusCreated, response.Code)
+		want := "{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"lastModifiedByUserId\":1}"
+
+		if body := response.Body.String(); body != want {
+			t.Errorf("Expected %s. Got %s", want, body)
+		}
+	})
+	t.Run("AUTH Get one customer", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/customers/all", nil)
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer ", token))
 		response := executeRequest(t, req)
 
 		want := "[{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"lastModifiedByUserId\":1}]"
@@ -61,30 +134,30 @@ func Test_Route_Customer_listAllCustomers(t *testing.T) {
 			t.Errorf("Expected %s. Got %s", want, body)
 		}
 	})
-	t.Run("Get two customers", func(t *testing.T) {
-		clearCustomersTable()
-		// Add two customers
+	t.Run("AUTH Create another customer", func(t *testing.T) {
+		// Add one customer
 		newCustomer := models.Customer{
-			Name:                 "Test_Name",
-			Surname:              "Test_Surname",
-			PictureId:            1,
-			LastModifiedByUserId: 1,
-		}
-		anotherCustomer := models.Customer{
 			Name:                 "Test_Name_2",
 			Surname:              "Test_Surname_2",
 			PictureId:            1,
 			LastModifiedByUserId: 1,
 		}
-
 		data, _ := json.Marshal(newCustomer)
-		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
-		executeRequest(t, req)
-		data, _ = json.Marshal(anotherCustomer)
-		req, _ = http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
-		executeRequest(t, req)
+		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBuffer(data))
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer ", token))
 
-		req, _ = http.NewRequest("GET", "/customers/all", nil)
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusCreated, response.Code)
+		want := "{\"id\":2,\"name\":\"Test_Name_2\",\"surname\":\"Test_Surname_2\",\"pictureId\":1,\"lastModifiedByUserId\":1}"
+
+		if body := response.Body.String(); body != want {
+			t.Errorf("Expected %s. Got %s", want, body)
+		}
+	})
+	t.Run("AUTHORIZED Get two customers", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/customers/all", nil)
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer ", token))
 		response := executeRequest(t, req)
 
 		want := "[{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"lastModifiedByUserId\":1},{\"id\":2,\"name\":\"Test_Name_2\",\"surname\":\"Test_Surname_2\",\"pictureId\":1,\"lastModifiedByUserId\":1}]"
@@ -95,63 +168,6 @@ func Test_Route_Customer_listAllCustomers(t *testing.T) {
 			t.Errorf("Expected %s. Got %s", want, body)
 		}
 	})
-}
-
-func Test_Route_Customer_getCustomer(t *testing.T) {
-	t.Run("Get a non existing customer", func(t *testing.T) {
-		clearCustomersTable()
-		req, _ := http.NewRequest("GET", "/customers/22", nil)
-		response := executeRequest(t, req)
-
-		checkResponseCode(t, http.StatusNotFound, response.Code)
-
-		var m map[string]string
-		json.Unmarshal(response.Body.Bytes(), &m)
-		if m["error"] != "Customer not found" {
-			t.Errorf("Expected the 'error' key of the response to be set to 'Customer not found'. Got '%s'", m["error"])
-		}
-	})
-	t.Run("Get one customer", func(t *testing.T) {
-		clearCustomersTable()
-		// Add one customer
-		newCustomer := models.Customer{
-			Name:                 "Test_Name",
-			Surname:              "Test_Surname",
-			PictureId:            1,
-			LastModifiedByUserId: 1,
-		}
-		data, _ := json.Marshal(newCustomer)
-		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
-		executeRequest(t, req)
-
-		req, _ = http.NewRequest("GET", "/customers/1", nil)
-		response := executeRequest(t, req)
-
-		want := "{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"lastModifiedByUserId\":1}"
-
-		checkResponseCode(t, http.StatusOK, response.Code)
-
-		if body := response.Body.String(); body != want {
-			t.Errorf("Expected %s. Got %s", want, body)
-		}
-	})
-	t.Run("Non valid ID parameter", func(t *testing.T) {
-		clearCustomersTable()
-		req, _ := http.NewRequest("GET", "/customers/hola", nil)
-		response := executeRequest(t, req)
-
-		checkResponseCode(t, http.StatusNotFound, response.Code)
-
-		got := response.Body.Bytes()
-		want := []byte("404 page not found")
-		if reflect.DeepEqual(got, want) {
-			t.Errorf("Expected %s. Got '%s'", want, got)
-		}
-	})
-}
-
-func Test_Route_Customer_createCustomer(t *testing.T) {
-	// TODO: not implemented
 }
 
 func Test_Route_Customer_updateCustomer(t *testing.T) {
@@ -165,11 +181,11 @@ func Test_Route_Customer_deleteCustomer(t *testing.T) {
 func clearCustomersTable() {
 	_, err := db.DB.Exec("DELETE FROM customers")
 	if err != nil {
-		fmt.Printf(err.Error())
+		fmt.Print(err.Error())
 	}
 	_, err = db.DB.Exec("ALTER SEQUENCE customers_id_seq RESTART WITH 1")
 	if err != nil {
-		fmt.Printf(err.Error())
+		fmt.Print(err.Error())
 	}
 }
 
@@ -186,4 +202,12 @@ func checkResponseCode(t *testing.T, expected, actual int) {
 	if expected != actual {
 		t.Errorf("Expected response code %d. Got %d\n", expected, actual)
 	}
+}
+
+func authenticateUser(t *testing.T, u models.User) *httptest.ResponseRecorder {
+	data, _ := json.Marshal(u)
+	req, _ := http.NewRequest("POST", "/users/login", bytes.NewBuffer(data))
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Length", strconv.Itoa(len(data)))
+	return executeRequest(t, req)
 }
