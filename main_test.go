@@ -123,8 +123,9 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		want := `\{"result":"success","token":"[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_.+/=]*?"\}`
 		got := response.Body.String()
 
-		if matched, _ := regexp.MatchString(want, got); !matched {
-			t.Logf("Response %v does not match expected format %v", got, want)
+		if matched, err := regexp.MatchString(want, got); !matched {
+			t.Logf("Response %v does not match expected format: %v", got, want)
+			t.Logf("Regexp error: %q", err.Error())
 			t.Fail()
 		}
 
