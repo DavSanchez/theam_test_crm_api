@@ -330,10 +330,11 @@ func Test_Non_Auth_Picture_Routes(t *testing.T) {
 		}
 	})
 }
-
+/*
 func Test_Auth_Picture_Routes(t *testing.T) {
 	var token string
 	var uploadedPictureId int
+	clearAdditionalPictures()
 	// Authenticating and getting token
 	t.Run("Authenticate existing user", func(t *testing.T) {
 		user := models.User{
@@ -440,6 +441,7 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 		}
 	})
 }
+*/
 
 func clearCustomersTable() {
 	_, err := db.DB.Exec("DELETE FROM customers")
@@ -529,5 +531,4 @@ func createPictureMultiPartForm(t *testing.T, fileName string) (bytes.Buffer, *m
 	}
 	mpWriter.Close()
 	return b, mpWriter
-
 }
