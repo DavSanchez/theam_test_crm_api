@@ -11,9 +11,23 @@
             "mode": "auto",
             "program": "${workspaceFolder}/main.go",
             "env": {
-                "DATABASE_URL":"dbname=api user=docker password=docker host=localhost port=25432 sslmode=disable",
-                "PORT":"8080",
-                "JWT_SECRET":"DEBUGSECRET"},
+                "DATABASE_URL": "dbname=api user=docker password=docker host=localhost port=25432 sslmode=disable",
+                "PORT": "8080",
+                "JWT_SECRET": "DEBUGSECRET"
+            },
+            "args": []
+        },
+        {
+            "name": "Testing",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}/main_test.go",
+            "env": {
+                "DATABASE_URL": "dbname=api user=docker password=docker host=localhost port=25432 sslmode=disable",
+                "PORT": "8080",
+                "JWT_SECRET": "DEBUGSECRET"
+            },
             "args": []
         }
     ]
