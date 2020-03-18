@@ -85,6 +85,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		t.Fatalf("Aborting tests: %q", err.Error())
 	}
 	token := m["token"]
+	t.Logf("Token received from login: %s", token)
 
 	// Authenticated requests
 	t.Run("AUTH Get list with no customers", func(t *testing.T) {
