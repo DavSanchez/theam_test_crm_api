@@ -1,5 +1,7 @@
 # CRM API test for The Agile Monkeys.
 
+![Build status](https://davsanchez.semaphoreci.com/badges/theam_test_crm_api.svg?style=shields)
+
 This repo contains my proposed solution to **API Test - The CRM Service** by **The Agile Monkeys**. It is written in **Go**.
 
 ## App features
@@ -34,6 +36,7 @@ The following libraries were used for the backend development:
 - `gorilla/mux`: Provides the route handling via its HTTP request multiplexer.
 - `lib/pq`: Go database driver for PostgreSQL.
 - `crypto/bcrypt`: Cryptographic library for hashing and comparing passwords.
+- `dgrijalva/jwt-go`: Go implementation of JSON Web Tokens (JWT)
 
 ## <a name="API_endpoints"></a>API endpoints
 
@@ -144,7 +147,7 @@ Endpoint for getting the picture path of a specific `pictureId`.
 ```
 
 
-#### `POST /customers/picture/create`
+#### `POST /customers/picture/upload`
 Endpoint for uploading picture to the system.
 ```js
 (Uploaded and stored successfully) [multipart_form] -> {
@@ -159,8 +162,6 @@ Endpoint for uploading picture to the system.
 #### `POST /users/register`
 
 #### `POST /users/login`
-
-#### `POST /users/logout`
 
 
 ## Further improvements
