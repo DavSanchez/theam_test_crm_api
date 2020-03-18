@@ -352,8 +352,8 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 	})
 
 	// Authenticated requests
-	t.Run("AUTH Get a non existing customer", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/customers/22", nil)
+	t.Run("AUTH Get a non existing picture", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/customers/picture/22", nil)
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 		response := executeRequest(t, req)
@@ -362,16 +362,16 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 
 		var m map[string]string
 		json.Unmarshal(response.Body.Bytes(), &m)
-		if m["error"] != "Customer not found" {
-			t.Errorf("Expected the 'error' key of the response to be set to 'Customer not found'. Got '%s'", m["error"])
+		if m["error"] != "Picture not found" {
+			t.Errorf("Expected the 'error' key of the response to be set to 'Picture not found'. Got '%s'", m["error"])
 		}
 	})
-	t.Run("AUTH Get one customer", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/customers/1", nil)
+	t.Run("AUTH Get one picture", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/customers/picture/1", nil)
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
-		want := "{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"lastModifiedByUserId\":1}"
+		want := "{\"id\":1,\"picturePath\":\"///\"}"
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -380,7 +380,7 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 		}
 	})
 	t.Run("AUTH Get a non valid ID parameter", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/customers/hola", nil)
+		req, _ := http.NewRequest("GET", "/customers/picture/hola", nil)
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
