@@ -1,5 +1,7 @@
 # CRM API test for The Agile Monkeys.
 
+![Build status](https://davsanchez.semaphoreci.com/badges/theam_test_crm_api.svg?style=shields)
+
 This repo contains my proposed solution to **API Test - The CRM Service** by **The Agile Monkeys**. It is written in **Go**.
 
 ## App features
