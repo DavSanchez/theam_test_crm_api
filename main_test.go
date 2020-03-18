@@ -120,14 +120,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		}
 		response := authenticateUser(t, user)
 
-		want := `\{"result":"success","token":"[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_.+/=]*?"\}`
-		got := response.Body.String()
-
-		if matched, err := regexp.MatchString(want, got); !matched {
-			t.Logf("Response %v does not match expected format: %v", got, want)
-			t.Logf("Regexp error: %q", err.Error())
-			t.Fail()
-		}
+		matchJwtToken(t, response.Body.String())
 
 		m := make(map[string]string)
 		err := json.NewDecoder(response.Body).Decode(&m)
@@ -270,12 +263,7 @@ func Test_Auth_User_Routes(t *testing.T) {
 		}
 		response := authenticateUser(t, user)
 
-		want := "{\"result\":\"success\", \"token\":\"^[A-Za-z0-9-_=]+.[A-Za-z0-9-_=]+.?[A-Za-z0-9-_.+/=]*$\"}"
-		got := response.Body.String()
-
-		if matched, _ := regexp.MatchString(want, got); !matched {
-			t.Fatalf("Response %v does not match expected format", got)
-		}
+		matchJwtToken(t, response.Body.String())
 	})
 
 	t.Run("Authenticate invalid user", func(t *testing.T) {
@@ -328,10 +316,6 @@ func clearAdditionalUsers() {
 	if err != nil {
 		fmt.Print(err.Error())
 	}
-	// _, err = db.DB.Exec("ALTER SEQUENCE customers_id_seq RESTART WITH 1")
-	// if err != nil {
-	// 	fmt.Print(err.Error())
-	// }
 }
 
 func executeRequest(t *testing.T, req *http.Request) *httptest.ResponseRecorder {
@@ -355,4 +339,16 @@ func authenticateUser(t *testing.T, u models.User) *httptest.ResponseRecorder {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data)))
 	return executeRequest(t, req)
+}
+
+func matchJwtToken(t *testing.T, body string) {
+	t.Helper()
+	want := `\{"result":"success","token":"[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_.+/=]*?"\}`
+	got := body
+
+	if matched, err := regexp.MatchString(want, got); !matched {
+		t.Logf("Response %v does not match expected format: %v", got, want)
+		t.Logf("Regexp error: %q", err.Error())
+		t.Fail()
+	}
 }
