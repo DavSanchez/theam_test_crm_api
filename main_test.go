@@ -9,9 +9,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 
 	"theam.io/jdavidsanchez/test_crm_api/db"
@@ -23,7 +25,11 @@ import (
 
 func TestMain(m *testing.M) {
 	code := m.Run()
+
 	clearCustomersTable()
+	clearAdditionalUsers()
+	clearAdditionalPictures()
+
 	os.Exit(code)
 }
 
@@ -330,7 +336,7 @@ func Test_Non_Auth_Picture_Routes(t *testing.T) {
 		}
 	})
 }
-/*
+
 func Test_Auth_Picture_Routes(t *testing.T) {
 	var token string
 	var uploadedPictureId int
@@ -395,7 +401,8 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 	})
 	t.Run("AUTH Upload a picture", func(t *testing.T) {
 		// Attempt to upload picture
-		b, w := createPictureMultiPartForm(t, "./tests/assets/theam_test_arch.png")
+		file := filepath.Join("tests", "assets", "theam_test_arch.png")
+		b, w := createPictureMultiPartForm(t, file)
 
 		req, _ := http.NewRequest("POST", "/customers/picture/upload", &b)
 		req.Header.Set("Content-Type", w.FormDataContentType())
@@ -405,43 +412,43 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
-		want := `\{"id":[0-9]+,"picturePath":"static/[0-9]+\.(?:jpg|png)"\}`
-		got := response.Body.String()
+		want := `\{"id":[0-9]+?,"picturePath":"static/[0-9]+?\.(?:jpg|png|jpeg)"\}`
+		got := strings.TrimSuffix(response.Body.String(), "\n")
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
-		if matched, err := regexp.MatchString(want, got); !matched {
-			t.Logf("Response %v does not match expected format: %v", got, want)
-			t.Logf("Regexp error: %q", err.Error())
-			t.Fail()
+		matched, _ := regexp.MatchString(want, got)
+		if !matched {
+			t.Fatalf("Response %v does not match expected format: %v", got, want)
 		}
 
-		var m map[string]interface{}
-		json.Unmarshal(response.Body.Bytes(), &m)
-		var ok bool
-		uploadedPictureId, ok = m["id"].(int)
-		if !ok {
+		var m struct {
+			Id   int    `json:"id"`
+			Path string `json:"picturePath"`
+		}
+		err := json.Unmarshal(response.Body.Bytes(), &m)
+		if err != nil {
 			t.Fatalf("Could not parse response body %+v. Got ID: %+v", m, uploadedPictureId)
 		}
+		uploadedPictureId = m.Id
 	})
 	t.Run("AUTH Get one picture", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/customers/picture/%s", string(uploadedPictureId)), nil)
+		reqPath := fmt.Sprintf("/customers/picture/%s", strconv.Itoa(uploadedPictureId))
+		req, _ := http.NewRequest("GET", reqPath, nil)
+
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
-		want := `\{"id":[0-9]+,"picturePath":"static/[0-9]+\.(?:jpg|png)"\}`
+		want := `\{"id":[0-9]+?,"picturePath":"static/[0-9]+?\.(?:jpg|png|jpeg)"\}`
 		got := response.Body.String()
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
-		if matched, err := regexp.MatchString(want, got); !matched {
-			t.Logf("Response %v does not match expected format: %v", got, want)
-			t.Logf("Regexp error: %q", err.Error())
-			t.Fail()
+		if matched, _ := regexp.MatchString(want, got); !matched {
+			t.Fatalf("Response %v does not match expected format: %v", got, want)
 		}
 	})
 }
-*/
 
 func clearCustomersTable() {
 	_, err := db.DB.Exec("DELETE FROM customers")
@@ -459,7 +466,7 @@ func clearAdditionalUsers() {
 	if err != nil {
 		fmt.Print(err.Error())
 	}
-		_, err = db.DB.Exec("ALTER SEQUENCE users_id_seq RESTART WITH 2")
+	_, err = db.DB.Exec("ALTER SEQUENCE users_id_seq RESTART WITH 2")
 	if err != nil {
 		fmt.Print(err.Error())
 	}
@@ -470,7 +477,7 @@ func clearAdditionalPictures() {
 	if err != nil {
 		fmt.Print(err.Error())
 	}
-		_, err = db.DB.Exec("ALTER SEQUENCE picturess_id_seq RESTART WITH 2")
+	_, err = db.DB.Exec("ALTER SEQUENCE pictures_id_seq RESTART WITH 2")
 	if err != nil {
 		fmt.Print(err.Error())
 	}
