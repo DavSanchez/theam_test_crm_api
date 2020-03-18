@@ -21,7 +21,7 @@ func InitRouter() {
 	customers.HandleFunc("/{customerId:[0-9]+}", updateCustomer).Methods("PUT")
 	customers.HandleFunc("/{customerId:[0-9]+}", deleteCustomer).Methods("DELETE")
 	customers.HandleFunc("/picture/{pictureId}", getPicturePath).Methods("GET")
-	customers.HandleFunc("/picture", addPicture).Methods("POST")
+	customers.HandleFunc("/picture/upload", addPicture).Methods("POST")
 
 	// User authentication
 	users := Router.PathPrefix("/users").Subrouter()

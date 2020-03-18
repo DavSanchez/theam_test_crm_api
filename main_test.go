@@ -317,7 +317,7 @@ func Test_Non_Auth_Picture_Routes(t *testing.T) {
 			t.Errorf("Expected %q response. Got %q", want, got)
 		}
 	})
-	t.Run("NO_AUTH Get all customers", func(t *testing.T) {
+	t.Run("NO_AUTH Get picture path", func(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/customers/picture/1", nil)
 		response := executeRequest(t, req)
 
