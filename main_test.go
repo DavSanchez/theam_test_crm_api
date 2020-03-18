@@ -61,7 +61,7 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 			LastModifiedByUserId: 1,
 		}
 		data, _ := json.Marshal(newCustomer)
-		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBuffer(data))
+		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
 		response := executeRequest(t, req)
 
 		checkResponseCode(t, http.StatusUnauthorized, response.Code)
@@ -76,7 +76,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 	// Authenticating and getting token
 	user := models.User{
 		Username: "Admin",
-		Password: "Secret123",
+		Password: "hunter2",
 	}
 	res := authenticateUser(t, user)
 	m := make(map[string]interface{})
@@ -84,6 +84,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Aborting tests: %q", err.Error())
 	}
+	t.Logf("JSON decoded: %+v", m)
 	token := m["token"]
 	t.Logf("Token received from login: %s", token)
 
@@ -110,7 +111,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 			LastModifiedByUserId: 1,
 		}
 		data, _ := json.Marshal(newCustomer)
-		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBuffer(data))
+		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 		response := executeRequest(t, req)
@@ -144,7 +145,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 			LastModifiedByUserId: 1,
 		}
 		data, _ := json.Marshal(newCustomer)
-		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBuffer(data))
+		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 		response := executeRequest(t, req)
@@ -249,7 +250,7 @@ func checkResponseCode(t *testing.T, expected, actual int) {
 
 func authenticateUser(t *testing.T, u models.User) *httptest.ResponseRecorder {
 	data, _ := json.Marshal(u)
-	req, _ := http.NewRequest("POST", "/users/login", bytes.NewBuffer(data))
+	req, _ := http.NewRequest("POST", "/users/login", bytes.NewBufferString(string(data)))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data)))
 	return executeRequest(t, req)
