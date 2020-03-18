@@ -10,7 +10,7 @@ blocks:
       jobs:
         - name: go test
           commands:
-            - sem-service start postgres
+            - sem-service start postgres --username=semaphore --password=semaphore --db=api
             - sem-version go 1.11
             - export GO111MODULE=on
             - export GOPATH=~/go
@@ -19,3 +19,8 @@ blocks:
             - go get ./...
             - go test ./...
             - go build -v .
+      env_vars:
+        - name: JWT_SECRET
+          value: TESTSECRET
+        - name: DATABASE_URL
+          value: dbname=api user=semaphore password=semaphore sslmode=disable
