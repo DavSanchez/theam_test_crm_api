@@ -120,7 +120,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		}
 		response := authenticateUser(t, user)
 
-		want := "{\"result\":\"success\", \"token\":\"^[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_.+/=]*?$\"}"
+		want := fmt.Sprintf(`{"result":"success", "token":"%s"}`, regexp.QuoteMeta(`^[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_=]+?.[a-zA-Z0-9-_.+/=]*?$`))
 		got := response.Body.String()
 
 		if matched, _ := regexp.MatchString(want, got); !matched {
