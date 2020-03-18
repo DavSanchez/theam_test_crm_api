@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -70,4 +71,8 @@ func ValidateToken(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func getUserFromJWT() {
+	fmt.Print("Not implemented") // TODO
 }
