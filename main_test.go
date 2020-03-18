@@ -178,7 +178,6 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 	})
 
 	t.Run("AUTH Get a non existing customer", func(t *testing.T) {
-		clearCustomersTable()
 		req, _ := http.NewRequest("GET", "/customers/22", nil)
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
