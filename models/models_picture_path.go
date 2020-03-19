@@ -11,10 +11,16 @@ func (p *PicturePath) AddPicture(db *sql.DB) error {
 	err := db.QueryRow(`
 		INSERT INTO pictures (picturePath)
 		VALUES ($1)
+		ON CONFLICT DO NOTHING
 		RETURNING id
 		`, p.Path).Scan(&p.Id)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			// If already inserted, set picture ID to default
+			p.Id = 1
+			return nil
+		}
 		return err
 	}
 	return nil
