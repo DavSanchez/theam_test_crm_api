@@ -30,7 +30,7 @@ This will stop all the containers but won't remove the volumes defined for them.
 
 As the above diagram suggest, it is possible to run other backends external to the Docker container architecture, provided the different configuration parameters needed (backend port, database host and ports...) are taken into account.
 
-A stand-alone version of the backend is also running on [Heroku](https://www.heroku.com/), hooked to the GitHub repository's `heroku` branch and using the PostgreSQL database available in the SaaS platform's free tier. As long as authentication is not activated, you can make requests to the available endpoints (see [below](#API_endpoints)) at host [`https://theam-crm-api.herokuapp.com/`](https://theam-crm-api.herokuapp.com/).
+A stand-alone version of the backend is also running on [Heroku](https://www.heroku.com/), hooked to the GitHub repository's `heroku` branch and using the PostgreSQL database available in the SaaS platform's free tier. You can make requests to the available endpoints (see [below](#API_endpoints)) at host [`https://theam-crm-api.herokuapp.com/`](https://theam-crm-api.herokuapp.com/).
 
 The following libraries were used for the backend development:
 - `gorilla/mux`: Provides the route handling via its HTTP request multiplexer.
