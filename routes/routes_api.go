@@ -28,17 +28,20 @@ func InitRouter() {
 
 	users.HandleFunc("/register", registerUser).Methods("POST")
 	users.HandleFunc("/login", loginUser).Methods("POST")
-	// users.HandleFunc("/logout", logoutUser).Methods("POST")
 
 	// Static files (customer pictures)
 	var dir string
 	flag.StringVar(&dir, "images", "./"+utils.PathToImagesDir+"/", "Directory to serve the images")
 	Router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 
-	// Registering JWT middleware, Do It Yourself Style!
+	// Registering JWT middleware
 	customers.Use(auth.ValidateToken)
 
 	var publicDir string
 	flag.StringVar(&publicDir, "public", "./public/", "Directory to serve the homepage")
 	Router.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir(publicDir))))
+}
+
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+
 }
