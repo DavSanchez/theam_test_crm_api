@@ -186,6 +186,9 @@ Endpoint for user login and session token retrieval. The token has a expiration 
 
 ## Further improvements
 
+### Database pre-populating
+At this moment, the database table creation and pre-populating with a placeholder image path and an administrator user is done at `db/db.go`, being part of the backend execution. This is should be done somewhere else, be it mouting a directory with the `sql` files to `/docker-entrypoint-initdb.d/` at the PostgreSQL Docker image, which initializes it if the database is empty, or using other environment-specific methods available.
+
 ### Better error handling
 At this moment many of the errors that can occur are simply printed to the standard logger (stoppping the erroring operation where it makes sense, of course) and in case it's needed they are used as a response to API requests. This needs some polish.
 
