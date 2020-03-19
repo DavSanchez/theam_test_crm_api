@@ -26,7 +26,7 @@ docker-compose down
 
 This will stop all the containers but won't remove the volumes defined for them. Thus, the database contents will be persisted in its volume for the next time it is run.
 
-![Project architecture](./public/theam_test_arch.png "Project architecture")
+![Project architecture](./public/theamTestArch.png "Project architecture")
 
 As the above diagram suggest, it is possible to run other backends external to the Docker container architecture, provided the different configuration parameters needed (backend port, database host and ports...) are taken into account.
 

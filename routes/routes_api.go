@@ -32,9 +32,13 @@ func InitRouter() {
 
 	// Static files (customer pictures)
 	var dir string
-	flag.StringVar(&dir, "dir", "./"+utils.PathToImagesDir+"/", "Directory to serve the images")
+	flag.StringVar(&dir, "images", "./"+utils.PathToImagesDir+"/", "Directory to serve the images")
 	Router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 
 	// Registering JWT middleware, Do It Yourself Style!
 	customers.Use(auth.ValidateToken)
+
+	var publicDir string
+	flag.StringVar(&publicDir, "public", "./public/", "Directory to serve the homepage")
+	Router.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir(publicDir))))
 }
