@@ -21,7 +21,9 @@ import (
 	"theam.io/jdavidsanchez/test_crm_api/routes"
 )
 
-// Integration test (test the API and its connection with the database)
+/***************************************************************
+System/E2E test (whole API and its connection with the database)
+****************************************************************/
 
 func TestMain(m *testing.M) {
 	code := m.Run()
@@ -39,9 +41,10 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 	t.Run("NO_AUTH Create customer", func(t *testing.T) {
 		// Add one customer
 		newCustomer := models.Customer{
-			Name:                 "Test_Name",
-			Surname:              "Test_Surname",
-			PictureId:            1,
+			CustomerOut: models.CustomerOut{
+				Name:    "Test_Name",
+				Surname: "Test_Surname",
+			},
 		}
 		data, _ := json.Marshal(newCustomer)
 		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
@@ -82,9 +85,10 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 	})
 	t.Run("NO_AUTH Update customer", func(t *testing.T) {
 		newCustomer := models.Customer{
-			Name:                 "Test_Name_MODIFIED",
-			Surname:              "Test_Surname_MODIFIED",
-			PictureId:            1,
+			CustomerOut: models.CustomerOut{
+				Name:    "Test_Name_MODIFIED",
+				Surname: "Test_Surname_MODIFIED",
+			},
 		}
 		data, _ := json.Marshal(newCustomer)
 		req, _ := http.NewRequest("PUT", "/customers/1", bytes.NewBufferString(string(data)))
@@ -150,9 +154,10 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		clearCustomersTable()
 		// Add one customer
 		newCustomer := models.Customer{
-			Name:                 "Test_Name",
-			Surname:              "Test_Surname",
-			PictureId:            1,
+			CustomerOut: models.CustomerOut{
+				Name:    "Test_Name",
+				Surname: "Test_Surname",
+			},
 		}
 		data, _ := json.Marshal(newCustomer)
 		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
@@ -161,7 +166,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		response := executeRequest(t, req)
 
 		checkResponseCode(t, http.StatusCreated, response.Code)
-		want := "{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":1}"
+		want := "{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"picturePath\":\"static/noPicturePlaceholder.jpg\",\"createdByUser\":\"Admin\",\"lastModifiedByUser\":\"Admin\"}"
 
 		if body := response.Body.String(); body != want {
 			t.Errorf("Expected %s. Got %s", want, body)
@@ -172,7 +177,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
-		want := "[{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":1}]"
+		want := "[{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"picturePath\":\"static/noPicturePlaceholder.jpg\",\"createdByUser\":\"Admin\",\"lastModifiedByUser\":\"Admin\"}]"
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -183,9 +188,10 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 	t.Run("AUTH Create another customer", func(t *testing.T) {
 		// Add one customer
 		newCustomer := models.Customer{
-			Name:                 "Test_Name_2",
-			Surname:              "Test_Surname_2",
-			PictureId:            1,
+			CustomerOut: models.CustomerOut{
+				Name:    "Test_Name_2",
+				Surname: "Test_Surname_2",
+			},
 		}
 		data, _ := json.Marshal(newCustomer)
 		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
@@ -194,7 +200,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		response := executeRequest(t, req)
 
 		checkResponseCode(t, http.StatusCreated, response.Code)
-		want := "{\"id\":2,\"name\":\"Test_Name_2\",\"surname\":\"Test_Surname_2\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":1\"lastModifiedByUserId\":1}"
+		want := "{\"id\":2,\"name\":\"Test_Name_2\",\"surname\":\"Test_Surname_2\",\"picturePath\":\"static/noPicturePlaceholder.jpg\",\"createdByUser\":\"Admin\",\"lastModifiedByUser\":\"Admin\"}"
 
 		if body := response.Body.String(); body != want {
 			t.Errorf("Expected %s. Got %s", want, body)
@@ -205,7 +211,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
-		want := "[{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":1},{\"id\":2,\"name\":\"Test_Name_2\",\"surname\":\"Test_Surname_2\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":1}]"
+		want := "[{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"picturePath\":\"static/noPicturePlaceholder.jpg\",\"createdByUser\":\"Admin\",\"lastModifiedByUser\":\"Admin\"},{\"id\":2,\"name\":\"Test_Name_2\",\"surname\":\"Test_Surname_2\",\"picturePath\":\"static/noPicturePlaceholder.jpg\",\"createdByUser\":\"Admin\",\"lastModifiedByUser\":\"Admin\"}]"
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -233,7 +239,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
-		want := "{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"pictureId\":1,\"createdByUserId\":1,\"lastModifiedByUserId\":1}"
+		want := "{\"id\":1,\"name\":\"Test_Name\",\"surname\":\"Test_Surname\",\"picturePath\":\"static/noPicturePlaceholder.jpg\",\"createdByUser\":\"Admin\",\"lastModifiedByUser\":\"Admin\"}"
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -252,6 +258,43 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 		want := []byte("404 page not found")
 		if reflect.DeepEqual(got, want) {
 			t.Errorf("Expected %s. Got '%s'", want, got)
+		}
+	})
+	t.Run("AUTH Update customer", func(t *testing.T) {
+		updatedCustomer := models.Customer{
+			CustomerOut: models.CustomerOut{
+				Name:    "Test_Name_MODIFIED",
+				Surname: "Test_Surname_MODIFIED",
+			},
+		}
+		data, err := json.Marshal(updatedCustomer)
+		dataString := string(data)
+		if err != nil {
+			t.Logf("Error: %s", err.Error())
+		}
+		req, _ := http.NewRequest("PUT", "/customers/1", bytes.NewBufferString(dataString))
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		got := response.Body.String()
+		want := "{\"id\":1,\"name\":\"Test_Name_MODIFIED\",\"surname\":\"Test_Surname_MODIFIED\",\"picturePath\":\"static/noPicturePlaceholder.jpg\",\"createdByUser\":\"Admin\",\"lastModifiedByUser\":\"Admin\"}"
+		if got != want {
+			t.Errorf("Expected %q response. Got %q", want, got)
+		}
+	})
+	t.Run("AUTH Delete customer", func(t *testing.T) {
+		req, _ := http.NewRequest("DELETE", "/customers/1", nil)
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+		response := executeRequest(t, req)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		got := response.Body.String()
+		want := "{\"result\":\"success\"}"
+		if got != want {
+			t.Errorf("Expected %q response. Got %q", want, got)
 		}
 	})
 }
@@ -334,6 +377,7 @@ func Test_Non_Auth_Picture_Routes(t *testing.T) {
 }
 
 func Test_Auth_Picture_Routes(t *testing.T) {
+	const imagePathRegexp = `\{"id":[0-9]+?,"picturePath":"static/[0-9]+?\.(?:jpg|png|jpeg)"\}`
 	var token string
 	var uploadedPictureId int
 	clearAdditionalPictures()
@@ -408,7 +452,7 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
-		want := `\{"id":[0-9]+?,"picturePath":"static/[0-9]+?\.(?:jpg|png|jpeg)"\}`
+		want := imagePathRegexp
 		got := strings.TrimSuffix(response.Body.String(), "\n")
 
 		checkResponseCode(t, http.StatusOK, response.Code)
@@ -435,7 +479,7 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		response := executeRequest(t, req)
 
-		want := `\{"id":[0-9]+?,"picturePath":"static/[0-9]+?\.(?:jpg|png|jpeg)"\}`
+		want := imagePathRegexp
 		got := response.Body.String()
 
 		checkResponseCode(t, http.StatusOK, response.Code)
