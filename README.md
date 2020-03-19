@@ -61,8 +61,9 @@ Endpoint for getting a list of all customers in the system.
         "id":1,
         "name":"Customer_1_name",
         "surname":"Customer_1_surname",
-        "pictureId":1,
-        "lastModifiedByUserId":1
+        "picturePath":"/path/to/picture.ext",
+        "createdBy":"creatorUser",
+        "lastModifiedByUser":"modificatorUser"
     },
     // ... (If more than 1 customer)
 ]
@@ -78,10 +79,11 @@ Endpoint for getting the customer of a specific `customerId`.
 ```js
 (Existing customerId) -> {
         "id":customerId,
-        "name":"customer_id_name",
-        "surname":"customer_id_surname",
-        "pictureId":1,
-        "lastModifiedByUserId":1
+        "name":"Customer_1_name",
+        "surname":"Customer_1_surname",
+        "picturePath":"/path/to/picture.ext",
+        "createdBy":"creatorUser",
+        "lastModifiedByUser":"modificatorUser"
 }
 (No customers) -> {"error":"Customer not found"}
 (Error) -> {"error":"error_message"}
@@ -89,37 +91,37 @@ Endpoint for getting the customer of a specific `customerId`.
 
 
 #### `POST /customers/create`
-Endpoint for creating a specific user in the system.
+Endpoint for creating a specific user in the system. This relies on having uploaded an image first (or not at all, in that case the `"pictureId"` field can be omitted) so the path is shown in the result.
 ```js
 (Created successfully) {
-        "name":"new_customer_name",
-        "surname":"new_customer_surname",
-        "pictureId":1,
-        "lastModifiedByUserId":1
+        "name":"Customer_1_name",
+        "surname":"Customer_1_surname",
+        "pictureId":pictureId, // Or omitted
 } -> {
         "id":2,
-        "name":"new_customer_name",
-        "surname":"new_customer_surname",
-        "pictureId":1,
-        "lastModifiedByUserId":1
+        "name":"Customer_2_name",
+        "surname":"Customer_2_surname",
+        "picturePath":"/path/to/picture.ext",
+        "createdBy":"creatorUser",
+        "lastModifiedByUser":"creatorUser"
 }
 (Error) * -> {"error":"error_message"}
 ```
 
 #### `PUT /customers/{customerId}`
-Endpoint for updating a specific user in the system.
+Endpoint for updating a specific user in the system. This relies on having uploaded an image first (or not at all, in that case the `"pictureId"` field can be omitted) so the path is shown in the result.
 ```js
 (Updated successfully) {
-        "name":"updated_customer_name",
-        "surname":"updated_customer_surname",
-        "pictureId":1,
-        "lastModifiedByUserId":1
+        "name":"Updated_customer_1_name",
+        "surname":"Updated_customer_1_surname",
+        "pictureId":pictureId, // Or omitted
 } -> {
         "id":customerId,
-        "name":"updated_customer_name",
-        "surname":"updated_customer_surname",
-        "pictureId":1,
-        "lastModifiedByUserId":1
+        "name":"Updated_customer_1_name",
+        "surname":"Updated_customer_1_surname",
+        "picturePath":"/path/to/picture.ext",
+        "createdBy":"creatorUser",
+        "lastModifiedByUser":"userWhoMadeTheRequest"
 }
 (Nonexistent {customerId}) * -> {"error":"No customer was updated"}
 (Error) * -> {"error":"error_message"}
@@ -146,11 +148,10 @@ Endpoint for getting the picture path of a specific `pictureId`.
 (Error) -> {"error":"error_message"}
 ```
 
-
 #### `POST /customers/picture/upload`
 Endpoint for uploading picture to the system.
 ```js
-(Uploaded and stored successfully) [multipart_form] -> {
+(Uploaded and stored successfully) [image_multipart_form] -> {
         "id":1,
         "picturePath":"picture/id/path.ext",
 }
@@ -158,16 +159,38 @@ Endpoint for uploading picture to the system.
 ```
 
 ### User authentication and authorization
+The whole `/customer` endpoints are behind an authentication middleware that uses JWT. To be able to make requests to these endpoints, you must set the `Authorization` header to `"Bearer {token}"`, where `{token}` is the value of the field with the same name on a successful response to `/users/login` (see below). Otherwise, all responses will be `Unauthorized` (or `Bad request` if the request payload is malformed) with their corresponding HTTP codes.
 
 #### `POST /users/register`
+Endpoint for registering a new user. The `"username"` values must be unique
+```js
+(Valid user) {
+        "username":"userName",
+        "password":"password",
+} -> {"result": "success"}
+(Password less than 12 characters) -> {"error": "Password less than 12 characters"}
+(Error) * -> {"error":"error_message"}
+```
 
 #### `POST /users/login`
+Endpoint for user login and session token retrieval. The token has a expiration time set to 5 minutes.
+```js
+(Valid user) {
+        "username":"userName",
+        "password":"password",
+} -> {"result": "success", "token": tokenString}
+(Error verificating user) -> {"error": "Invalid credentials"}
+(Error) * -> {"error":"error_message"}
+```
 
 
 ## Further improvements
 
-### // TODO
-// TODO
+### Better error handling
+At this moment many of the errors that can occur are simply printed to the standard logger (stoppping the erroring operation where it makes sense, of course) and in case it's needed they are used as a response to API requests. This needs some polish.
+
+### More testing
+At the time of writing this there is a _E2E_ or system test at `main_test.go` that uses the whole API in different situations (authenticated, not authenticated, invalid customers and users, etc). It's not fully exhaustive, but it tests every endpoint. There are not unit tests yet. It's good practice to include unit tests for every function in each of the individual packages, and I'll try to add them soon.
 
 ### ... and much more!
-I mean, this is being done in a week, while working full time and with a world-spanning viral crisis in full force! Sure there will be room for improvement :)
+I mean, this is being done in less than a week, while working full time and with a world-spanning viral crisis in full force! Sure there is room for improvement :)
