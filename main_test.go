@@ -347,7 +347,8 @@ func Test_Auth_User_Routes(t *testing.T) {
 func Test_Non_Auth_Picture_Routes(t *testing.T) {
 	t.Run("NO_AUTH Upload picture", func(t *testing.T) {
 		// Attempt to upload picture
-		b, w := createPictureMultiPartForm(t, "./tests/assets/theam_test_arch.png")
+		file := filepath.Join("tests", "assets", "theam_test_arch.png")
+		b, w := createPictureMultiPartForm(t, file)
 
 		req, _ := http.NewRequest("POST", "/customers/picture/upload", &b)
 		req.Header.Set("Content-Type", w.FormDataContentType())
