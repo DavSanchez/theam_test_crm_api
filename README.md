@@ -1,4 +1,4 @@
-# CRM API test for The Agile Monkeys.
+# CRM API test for The Agile Monkeys
 
 ![Build status](https://davsanchez.semaphoreci.com/badges/theam_test_crm_api/branches/develop.svg?style=shields)
 
