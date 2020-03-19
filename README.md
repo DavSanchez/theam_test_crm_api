@@ -193,7 +193,10 @@ At this moment, the database table creation and pre-populating with a placeholde
 At this moment many of the errors that can occur are simply printed to the standard logger (stoppping the erroring operation where it makes sense, of course) and in case it's needed they are used as a response to API requests. This needs some polish.
 
 ### More testing
-At the time of writing this there is a _E2E_ or system test at `main_test.go` that uses the whole API in different situations (authenticated, not authenticated, invalid customers and users, etc). It's not fully exhaustive, but it tests every endpoint. There are not unit tests yet. It's good practice to include unit tests for every function in each of the individual packages, and I'll try to add them soon.
+At the time of writing this there is a _E2E_ or system test at `main_test.go` that uses the whole API in different situations (authenticated, not authenticated, invalid customers and users, etc). It's not fully exhaustive, but it tests several behaviours of every endpoint. There are not unit tests yet. It's good practice to include unit tests for every function in each of the individual packages, and I'll try to add them soon.
+
+### HTTPS
+Of course. Let's Encrypt and everything. With a little bit of time I'll implement that too.
 
 ### Pretty homepage
 The root endpoint (`"/"`), having no API endpoint associated, is a good old `404 not found`. It would be great to have a pretty homepage there with this documentation...
