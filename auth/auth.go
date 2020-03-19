@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"theam.io/jdavidsanchez/test_crm_api/db"
+	"theam.io/jdavidsanchez/test_crm_api/models"
 	"theam.io/jdavidsanchez/test_crm_api/utils"
 )
 
@@ -72,8 +74,7 @@ func ValidateToken(next http.Handler) http.Handler {
 	})
 }
 
-/*
-func RefreshToken(w http.ResponseWriter, r *http.Request) {
+func GetUserIdFromJWT(r *http.Request) (int, error) {
 	var token string
 	tokens, ok := r.Header["Authorization"]
 	if ok && len(tokens) >= 1 {
@@ -81,41 +82,20 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 		token = strings.TrimPrefix(token, "Bearer ")
 	}
 
-	if token == "" {
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		return
-	}
-	claims := &Claims{}
-	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+	claims := jwt.MapClaims{}
+	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
 	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	if !tkn.Valid {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
+		return 0, err
 	}
 
-	if time.Unix(claims.ExpiresAt, 0).Sub(time.Now()) > 30*time.Second {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+	user := models.User{
+		Username: claims["username"].(string),
 	}
-
-	expirationTime := time.Now().Add(5 * time.Minute)
-	claims.ExpiresAt = expirationTime.Unix()
-	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := newToken.SignedString(jwtKey)
+	err = user.GetIdFromUsername(db.DB)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return 0, err
 	}
-
-	utils.ResponseJSON(w, http.StatusAccepted, map[string]string{"result": "success", "token": tokenString})
+	return user.Id, nil
 }
-*/

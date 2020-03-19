@@ -20,8 +20,8 @@ func InitRouter() {
 	customers.HandleFunc("/create", createCustomer).Methods("POST")
 	customers.HandleFunc("/{customerId:[0-9]+}", updateCustomer).Methods("PUT")
 	customers.HandleFunc("/{customerId:[0-9]+}", deleteCustomer).Methods("DELETE")
-	customers.HandleFunc("/picture/{pictureId}", getPicturePath).Methods("GET")
-	customers.HandleFunc("/picture", addPicture).Methods("POST")
+	customers.HandleFunc("/picture/{pictureId:[0-9]+}", getPicturePath).Methods("GET")
+	customers.HandleFunc("/picture/upload", addPicture).Methods("POST")
 
 	// User authentication
 	users := Router.PathPrefix("/users").Subrouter()
@@ -33,10 +33,8 @@ func InitRouter() {
 	// Static files (customer pictures)
 	var dir string
 	flag.StringVar(&dir, "dir", "./"+utils.PathToImagesDir+"/", "Directory to serve the images")
-	pictures := Router.PathPrefix("/static/").Subrouter()
-	pictures.Handle("/", http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
+	Router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 
 	// Registering JWT middleware, Do It Yourself Style!
 	customers.Use(auth.ValidateToken)
-	pictures.Use(auth.ValidateToken)
 }

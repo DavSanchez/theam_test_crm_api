@@ -46,8 +46,9 @@ func InitDB() {
 			id SERIAL PRIMARY KEY,
 			customername VARCHAR(32) NOT NULL,
 			surname VARCHAR(32) NOT NULL,
-			pictureId INT REFERENCES pictures(id),
-			lastModifiedByUserId INT REFERENCES users(id)
+			pictureId INTEGER REFERENCES pictures,
+			createdByUserId INTEGER REFERENCES users,
+			lastModifiedByUserId INTEGER REFERENCES users
 		)`)
 	utils.CheckErr(err)
 

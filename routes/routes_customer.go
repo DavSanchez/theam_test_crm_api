@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"theam.io/jdavidsanchez/test_crm_api/auth"
 	"theam.io/jdavidsanchez/test_crm_api/db"
 	"theam.io/jdavidsanchez/test_crm_api/models"
 	"theam.io/jdavidsanchez/test_crm_api/utils"
@@ -35,7 +36,9 @@ func getCustomer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := models.Customer{
-		Id: id,
+		CustomerOut: models.CustomerOut{
+			Id: id,
+		},
 	}
 	err = c.GetCustomer(db.DB)
 
@@ -48,8 +51,8 @@ func getCustomer(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	utils.ResponseJSON(w, http.StatusOK, c)
+	cOut := c.CustomerOut
+	utils.ResponseJSON(w, http.StatusOK, cOut)
 }
 
 func createCustomer(w http.ResponseWriter, r *http.Request) {
@@ -62,18 +65,25 @@ func createCustomer(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	id, err := auth.GetUserIdFromJWT(r)
+	if err != nil {
+		utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+	c.CreatedByUserId = id
+
 	err = c.CreateCustomer(db.DB)
 	if err != nil {
 		utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
-
-	utils.ResponseJSON(w, http.StatusCreated, c)
+	cOut := c.CustomerOut
+	utils.ResponseJSON(w, http.StatusCreated, cOut)
 }
 
 func updateCustomer(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["customerId"])
+	userId, err := strconv.Atoi(params["customerId"])
 
 	if err != nil {
 		utils.ResponseJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid customer ID"})
@@ -89,14 +99,23 @@ func updateCustomer(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	c.Id = id
+	id, err := auth.GetUserIdFromJWT(r)
+	if err != nil {
+		utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+	c.LastModifiedByUserId = id
+
+	c.Id = userId
 	err = c.UpdateCustomer(db.DB)
 	if err != nil {
 		utils.ResponseJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
+	//c.GetCustomer(db.DB)
 
-	utils.ResponseJSON(w, http.StatusOK, c)
+	cOut := c.CustomerOut
+	utils.ResponseJSON(w, http.StatusOK, cOut)
 }
 
 func deleteCustomer(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +128,9 @@ func deleteCustomer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := models.Customer{
-		Id: id,
+		CustomerOut: models.CustomerOut{
+			Id: id,
+		},
 	}
 	err = c.DeleteCustomer(db.DB)
 
