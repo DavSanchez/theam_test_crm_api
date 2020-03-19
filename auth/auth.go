@@ -1,13 +1,14 @@
 package auth
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"theam.io/jdavidsanchez/test_crm_api/db"
+	"theam.io/jdavidsanchez/test_crm_api/models"
 	"theam.io/jdavidsanchez/test_crm_api/utils"
 )
 
@@ -73,6 +74,28 @@ func ValidateToken(next http.Handler) http.Handler {
 	})
 }
 
-func getUserFromJWT() {
-	fmt.Print("Not implemented") // TODO
+func GetUserIdFromJWT(r *http.Request) (int, error) {
+	var token string
+	tokens, ok := r.Header["Authorization"]
+	if ok && len(tokens) >= 1 {
+		token = tokens[0]
+		token = strings.TrimPrefix(token, "Bearer ")
+	}
+
+	claims := jwt.MapClaims{}
+	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	user := models.User{
+		Username: claims["username"].(string),
+	}
+	err = user.GetIdFromUsername(db.DB)
+	if err != nil {
+		return 0, err
+	}
+	return user.Id, nil
 }

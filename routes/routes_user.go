@@ -57,7 +57,3 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 
 	auth.SetJWT(u.Username, w, r)
 }
-
-// func logoutUser(w http.ResponseWriter, r *http.Request) {
-// 	fmt.Fprint(w, "Logout user")
-// }
