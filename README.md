@@ -26,11 +26,11 @@ docker-compose down
 
 This will stop all the containers but won't remove the volumes defined for them. Thus, the database contents will be persisted in its volume for the next time it is run.
 
-![Project architecture](./theam_test_arch.png "Project architecture")
+![Project architecture](./public/theam_test_arch.png "Project architecture")
 
 As the above diagram suggest, it is possible to run other backends external to the Docker container architecture, provided the different configuration parameters needed (backend port, database host and ports...) are taken into account.
 
-A stand-alone version of the backend is also running on [Heroku](https://www.heroku.com/), hooked to the GitHub repository's `heroku` branch and using the PostgreSQL database available in the SaaS platform's free tier. As long as authentication is not activated, you can make requests to the available endpoints (see [below](#API_endpoints)) at host [`https://theam-crm-api.herokuapp.com/`](https://theam-crm-api.herokuapp.com/).
+A stand-alone version of the backend is also running on [Heroku](https://www.heroku.com/), hooked to the GitHub repository's `heroku` branch and using the PostgreSQL database available in the SaaS platform's free tier. You can make requests to the available endpoints (see [below](#API_endpoints)) at host [`https://theam-crm-api.herokuapp.com/`](https://theam-crm-api.herokuapp.com/) (remember to login first :)).
 
 The following libraries were used for the backend development:
 - `gorilla/mux`: Provides the route handling via its HTTP request multiplexer.
@@ -194,6 +194,9 @@ At this moment many of the errors that can occur are simply printed to the stand
 
 ### More testing
 At the time of writing this there is a _E2E_ or system test at `main_test.go` that uses the whole API in different situations (authenticated, not authenticated, invalid customers and users, etc). It's not fully exhaustive, but it tests every endpoint. There are not unit tests yet. It's good practice to include unit tests for every function in each of the individual packages, and I'll try to add them soon.
+
+### Pretty homepage
+The root endpoint (`"/"`), having no API endpoint associated, is a good old `404 not found`. It would be great to have a pretty homepage there with this documentation...
 
 ### ... and much more!
 I mean, this is being done in less than a week, while working full time and with a world-spanning viral crisis in full force! Sure there is room for improvement :)
