@@ -40,5 +40,5 @@ func InitRouter() {
 
 	var publicDir string
 	flag.StringVar(&publicDir, "public", "./public/", "Directory to serve the homepage")
-	Router.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir(publicDir))))
+	Router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir(publicDir))))
 }
