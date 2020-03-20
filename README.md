@@ -198,8 +198,5 @@ At the time of writing this there is an _E2E_ or system test at `main_test.go` t
 ### HTTPS
 Of course. Let's Encrypt and everything. With a little bit of time I'll implement that too.
 
-### Pretty homepage
-The root endpoint (`"/"`), having no API endpoint associated, is a good old `404 not found`. It would be great to have a pretty homepage there with this documentation...
-
 ### ... and much more!
 I mean, this is being done in less than a week, while working full time and with a world-spanning viral crisis in full force! Sure there is room for improvement :)
