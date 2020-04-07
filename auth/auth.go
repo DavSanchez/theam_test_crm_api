@@ -50,7 +50,8 @@ func ValidateToken(next http.Handler) http.Handler {
 		}
 
 		if token == "" {
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			//http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			utils.ResponseJSON(w, http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
 			return
 		}
 
