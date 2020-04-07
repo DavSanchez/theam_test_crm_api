@@ -10,7 +10,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -47,13 +46,14 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 			},
 		}
 		data, _ := json.Marshal(newCustomer)
-		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
+		req, _ := http.NewRequest("POST", "/customers/", bytes.NewBufferString(string(data)))
 		response := executeRequest(t, req)
 
 		checkResponseCode(t, http.StatusUnauthorized, response.Code)
 
 		got := response.Body.String()
-		want := "Unauthorized\n"
+		want := "{\"error\":\"Unauthorized\"}"
+
 		if got != want {
 			t.Errorf("Expected %q response. Got %q", want, got)
 		}
@@ -65,7 +65,8 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 		checkResponseCode(t, http.StatusUnauthorized, response.Code)
 
 		got := response.Body.String()
-		want := "Unauthorized\n"
+		want := "{\"error\":\"Unauthorized\"}"
+
 		if got != want {
 			t.Errorf("Expected %q response. Got %q", want, got)
 		}
@@ -78,7 +79,8 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 		checkResponseCode(t, http.StatusUnauthorized, response.Code)
 
 		got := response.Body.String()
-		want := "Unauthorized\n"
+		want := "{\"error\":\"Unauthorized\"}"
+
 		if got != want {
 			t.Errorf("Expected %q response. Got %q", want, got)
 		}
@@ -97,7 +99,8 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 		checkResponseCode(t, http.StatusUnauthorized, response.Code)
 
 		got := response.Body.String()
-		want := "Unauthorized\n"
+		want := "{\"error\":\"Unauthorized\"}"
+
 		if got != want {
 			t.Errorf("Expected %q response. Got %q", want, got)
 		}
@@ -109,7 +112,8 @@ func Test_Non_Auth_Customer_Routes(t *testing.T) {
 		checkResponseCode(t, http.StatusUnauthorized, response.Code)
 
 		got := response.Body.String()
-		want := "Unauthorized\n"
+		want := "{\"error\":\"Unauthorized\"}"
+
 		if got != want {
 			t.Errorf("Expected %q response. Got %q", want, got)
 		}
@@ -160,7 +164,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 			},
 		}
 		data, _ := json.Marshal(newCustomer)
-		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
+		req, _ := http.NewRequest("POST", "/customers/", bytes.NewBufferString(string(data)))
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 		response := executeRequest(t, req)
@@ -194,7 +198,7 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 			},
 		}
 		data, _ := json.Marshal(newCustomer)
-		req, _ := http.NewRequest("POST", "/customers/create", bytes.NewBufferString(string(data)))
+		req, _ := http.NewRequest("POST", "/customers/", bytes.NewBufferString(string(data)))
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 		response := executeRequest(t, req)
@@ -254,9 +258,10 @@ func Test_Auth_Customer_Routes(t *testing.T) {
 
 		checkResponseCode(t, http.StatusNotFound, response.Code)
 
-		got := response.Body.Bytes()
-		want := []byte("404 page not found")
-		if reflect.DeepEqual(got, want) {
+		got := response.Body.String()
+		want := "{\"error\":\"Not found\"}"
+
+		if got != want {
 			t.Errorf("Expected %s. Got '%s'", want, got)
 		}
 	})
@@ -317,8 +322,8 @@ func Test_Auth_User_Routes(t *testing.T) {
 		}
 		response := authenticateUser(t, user)
 
-		want := "{\"error\":\"Invalid credentials\"}"
 		got := response.Body.String()
+		want := "{\"error\":\"Invalid credentials\"}"
 
 		if got != want {
 			t.Fatalf("Expected response was %q, got %q", want, got)
@@ -334,8 +339,8 @@ func Test_Auth_User_Routes(t *testing.T) {
 		req, _ := http.NewRequest("POST", "/users/register", bytes.NewBufferString(string(data)))
 		response := executeRequest(t, req)
 
-		want := "{\"result\":\"success\"}"
 		got := response.Body.String()
+		want := "{\"result\":\"success\"}"
 
 		if got != want {
 			t.Fatalf("Expected response was %q, got %q", want, got)
@@ -350,7 +355,7 @@ func Test_Non_Auth_Picture_Routes(t *testing.T) {
 		file := filepath.Join("tests", "assets", "theam_test_arch.png")
 		b, w := createPictureMultiPartForm(t, file)
 
-		req, _ := http.NewRequest("POST", "/customers/picture/upload", &b)
+		req, _ := http.NewRequest("POST", "/customers/picture", &b)
 		req.Header.Set("Content-Type", w.FormDataContentType())
 
 		response := executeRequest(t, req)
@@ -358,7 +363,8 @@ func Test_Non_Auth_Picture_Routes(t *testing.T) {
 		checkResponseCode(t, http.StatusUnauthorized, response.Code)
 
 		got := response.Body.String()
-		want := "Unauthorized\n"
+		want := "{\"error\":\"Unauthorized\"}"
+
 		if got != want {
 			t.Errorf("Expected %q response. Got %q", want, got)
 		}
@@ -370,7 +376,8 @@ func Test_Non_Auth_Picture_Routes(t *testing.T) {
 		checkResponseCode(t, http.StatusUnauthorized, response.Code)
 
 		got := response.Body.String()
-		want := "Unauthorized\n"
+		want := "{\"error\":\"Unauthorized\"}"
+
 		if got != want {
 			t.Errorf("Expected %q response. Got %q", want, got)
 		}
@@ -434,9 +441,10 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 
 		checkResponseCode(t, http.StatusNotFound, response.Code)
 
-		got := response.Body.Bytes()
-		want := []byte("404 page not found")
-		if reflect.DeepEqual(got, want) {
+		got := response.Body.String()
+		want := "{\"error\":\"Not found\"}"
+
+		if got != want {
 			t.Errorf("Expected %s. Got '%s'", want, got)
 		}
 	})
@@ -445,7 +453,7 @@ func Test_Auth_Picture_Routes(t *testing.T) {
 		file := filepath.Join("tests", "assets", "theam_test_arch.png")
 		b, w := createPictureMultiPartForm(t, file)
 
-		req, _ := http.NewRequest("POST", "/customers/picture/upload", &b)
+		req, _ := http.NewRequest("POST", "/customers/picture", &b)
 		req.Header.Set("Content-Type", w.FormDataContentType())
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
