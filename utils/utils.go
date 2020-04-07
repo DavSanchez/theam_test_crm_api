@@ -52,6 +52,7 @@ func CheckErr(err error) {
 	}
 }
 
+// FIXME Change for username + timestamp as filename
 func generateRandomFilename(dir, filename string) (name string, err error) {
 	for i := 0; i < 10000; i++ {
 		/*
